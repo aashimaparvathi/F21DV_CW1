@@ -1,3 +1,8 @@
+/* #map-container {
+  width: fit-content;
+  height: fit-content;
+} */
+
 .country {
   stroke-width: 0.5px;
 }
@@ -42,4 +47,31 @@
   font-family: serif;
   fill: #fb6a4a;
   font-size: 20px;
+}
+
+.bubble-title-c {
+  font-family: serif;
+  font-size: 20px;
+}
+
+.bubble-xaxis-c {
+  font-family: serif;
+  font-size: 16px;
+  fill: #db3915;
+}
+
+.bubble-yaxis-c {
+  font-family: serif;
+  font-size: 16px;
+  fill: #db3915;
+}
+
+.bubbletooltip-text {
+  color: #444444;
+  font-family: serif;
+  font-size: 15px;
+}
+
+.country-highlight {
+  stroke-width: 1px;
 }

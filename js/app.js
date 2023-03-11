@@ -35,7 +35,7 @@ var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   wave2month = 9,
   wave3year = 2021,
   wave3month = 5;
-const intervalDelay = 1000; // change intervalDelay back to 1000 later
+const intervalDelay = 500; // change intervalDelay back to 1000 later
 // Create a mapping object to store iso_code -> country_name mapping
 const isoToCountry = {};
 

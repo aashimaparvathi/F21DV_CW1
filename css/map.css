@@ -62,15 +62,12 @@
   font-size: 20px;
 }
 
-.bubble-xaxis-c {
+.bubble-xaxis-c,
+.bubble-yaxis-c,
+.y-axis-label,
+.x-axis-label {
   font-family: serif, Arial, Helvetica, sans-serif;
-  font-size: 16px;
-  fill: #db3915;
-}
-
-.bubble-yaxis-c {
-  font-family: serif, Arial, Helvetica, sans-serif;
-  font-size: 16px;
+  font-size: 17px;
   fill: #db3915;
 }
 
@@ -93,7 +90,11 @@
 }
 
 .x-axis,
-.y-axis {
+.y-axis,
+.heat-x-axis,
+.heat-y-axis,
+.bubble-x-axis,
+.bubble-y-axis {
   stroke: #999999;
   stroke-width: 0.5px;
 }
@@ -149,27 +150,25 @@
   height: 295px;
 }
 
-/* .border-c {
-  border: 2px solid #000;
-  border-radius: 5px;
-  position: absolute;
-  top: 10;
-  left: 10;
-  width: 200px;
-  height: 100px;
+.gdp-dropdown-button {
+  fill: white;
+  stroke: #999999;
+  stroke-width: 3px;
+  cursor: pointer;
 }
 
-div#border {
-  width: 200px;
-  height: 100px;
+.gdp-dropdown-option {
+  font-size: 13px;
+  font-family: sans-serif;
+  fill: #444444;
+  cursor: pointer;
 }
 
-div#border {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+.gdp-dropdown-option:hover {
+  font-weight: bold;
 }
 
-div#border {
-  background-color: #f0f0f0;
-} */
+.cases-rect,
+.deaths-rect {
+  fill-opacity: 0.9;
+}

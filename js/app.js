@@ -1,3 +1,5 @@
+import { drawHeatmap } from "./heatmap.js";
+
 // Define the dimensions and margins of the plot
 var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   bubbleMargin = { top: 20, bottom: 50, left: 50, right: 30 },
@@ -9,20 +11,14 @@ var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   lineWidth = 1250 - lineMargin.left - lineMargin.right,
   lineHeight = 290 - lineMargin.top - lineMargin.bottom,
   bubbleChart,
+  readyForBubble = 0,
   bubbleX,
-  bubbleXValues,
-  bubbleXTicks,
   bubbleY,
-  bubbleYValues,
-  bubbleYTicks,
   bubbleTickFormatter,
   bubbleR,
   bubbleColor,
-  variableBubbleColor,
-  readyForBubble = 0,
   bubbleID,
   bubbleIsoCode,
-  countryColor,
   dropdown,
   linexScale,
   lineyScale,
@@ -31,13 +27,16 @@ var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   firstTime = 0,
   wave1year = 2020,
   wave1month = 3,
-  wave2year = 2020,
-  wave2month = 9,
+  wave2year = 2021,
+  wave2month = 3,
   wave3year = 2021,
-  wave3month = 5;
-const intervalDelay = 500; // change intervalDelay back to 1000 later
+  wave3month = 5,
+  dataForAMonth_g = {}; // global variable;
+const intervalDelay = 10; // change intervalDelay back to 1000 later
 // Create a mapping object to store iso_code -> country_name mapping
 const isoToCountry = {};
+var gdpData = {};
+export { gdpData };
 
 const tooltip = d3
   .select("body")
@@ -53,14 +52,6 @@ const bubbletooltip = d3
   .style("opacity", 0)
   .style("position", "absolute");
 
-// const border = d3
-//   .select("body")
-//   .append("div")
-//   .attr("class", "border-c")
-//   .attr("id", "border")
-//   .style("opacity", 0)
-//   .style("position", "absolute");
-
 // create a div to hold the location or flag image
 let locationImage = d3
   .select("body")
@@ -70,15 +61,7 @@ let locationImage = d3
   .style("pointer-events", "none")
   .style("opacity", 0);
 
-var myCountries = [
-  { location: "USA", iso_code: "USA" },
-  { location: "China", iso_code: "CHN" },
-  { location: "Australia", iso_code: "AUS" },
-  { location: "Guyana", iso_code: "GUY" },
-  { location: "Central African Republic", iso_code: "CAF" },
-];
-
-var myIsoCodes = ["USA", "CHN", "AUS", "GUY", "CAF"];
+var myIsoCodes = ["USA", "CHN", "AUS", "GUY", "CAF", "VUT", "GRL", "PHL"];
 
 const group = d3
   .select("body")
@@ -129,6 +112,12 @@ var lineGroup = d3
   .attr("class", "linegroup-c")
   .attr("id", "linegroup");
 
+var gdpGroup = d3
+  .select("body")
+  .append("g")
+  .attr("class", "gdpgroup-c")
+  .attr("id", "gdpgroup");
+
 const container = lineGroup.append("div").attr("class", "dropdown-container");
 
 var lineSvg = lineGroup
@@ -141,7 +130,12 @@ var lineSvg = lineGroup
     "translate(" + lineMargin.left + 230 + "," + lineMargin.top + ")"
   );
 
-//d3.select(".play-c").style("margin-left", svgWidth / 2 + "px");
+// var gdpSvg = gdpGroup
+//   .append("svg")
+//   .attr("width", gdpWidth + gdpMargin.left + gdpMargin.right)
+//   .attr("height", gdpHeight + gdpMargin.top + gdpMargin.bottom)
+//   .append("g")
+//   .attr("transform", "translate(" + gdpMargin.left + "," + gdpMargin.top + ")");
 
 // Create projection to map the latitudes and longitudes to x and y
 const projection = d3
@@ -155,8 +149,6 @@ const path = d3.geoPath().projection(projection);
 
 const formatNumber = d3.format(".2s");
 const formatTime = d3.timeFormat("%B, %Y");
-
-var dataForAMonth_g = {}; // global variable
 
 function filterData(month, year, data) {
   //console.log(data);
@@ -215,6 +207,14 @@ Promise.all([
   console.log("monthly: ");
   console.log(monthly);
 
+  // Create a map of country names to data for that country
+  var dataMap = d3.group(monthly, function (d) {
+    return d.location;
+  });
+
+  console.log("DataMap:");
+  console.log(dataMap);
+
   // Loop through the data and populate the mapping object
   monthly.forEach(function (d) {
     isoToCountry[d.iso_code] = d.location;
@@ -238,13 +238,21 @@ Promise.all([
     d.total_cases = +d.total_cases;
   });
 
+  gdpData = monthly.filter(
+    (d) => d.year === wave2year && d.month === wave2month
+  );
+  console.log("gdpData for heatmap.js:");
+  console.log(gdpData);
+
+  drawHeatmap("gdpgroup");
+
   var yearToFilter = 2020;
-  var monthToFilter = 1;
+  var monthToFilter = 2;
 
   let intervalId = null;
   let index = 0;
   var count = 0;
-  const maxCount = 39,
+  const maxCount = 38,
     casesByCountry = {};
   var periodItem = svg;
 
@@ -333,8 +341,18 @@ Promise.all([
     .attr("id", (d) => d.id)
     .attr("d", path)
     .attr("fill", "#ffffff")
-    .attr("stroke", "#666666")
+    .attr("stroke", "#aaaaaa")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  renderBubble(yearToFilter, monthToFilter);
+  var dataForAMonth = monthly.filter(
+    (d) => d.year === yearToFilter && d.month === monthToFilter
+  );
+
+  updateColors(yearToFilter, monthToFilter, dataForAMonth);
+
+  yearToFilter = 2020;
+  monthToFilter = 2;
 
   var locationimage = countries
     .append("image")
@@ -345,14 +363,8 @@ Promise.all([
     .attr("height", 20)
     .attr("opacity", 0);
 
-  // Create a map of country names to data for that country
-  var dataMap = d3.group(monthly, function (d) {
-    return d.location;
-  });
-
-  console.log("DataMap:");
-  console.log(dataMap);
   renderLineChart(dataMap);
+  updateChart();
 
   // Set up the play button
   const button = d3.select("#play-button");
@@ -403,7 +415,7 @@ Promise.all([
       clearInterval(intervalId);
       intervalId = null;
       button.text("▶");
-      if (firstTime >= 1) {
+      if (firstTime) {
         bubbleChart.remove();
       }
       if (monthToFilter == 1) {
@@ -435,7 +447,7 @@ Promise.all([
     // console.log(
     //   "Data for year: " + yearToFilter + "and month: " + monthToFilter
     // );
-    dataForAMonth = monthly.filter(
+    var dataForAMonth = monthly.filter(
       (d) => d.year === yearToFilter && d.month === monthToFilter
     );
     // console.log(dataForAMonth);
@@ -462,7 +474,9 @@ Promise.all([
       intervalId = 0;
       count = 0;
       readyForBubble = 1;
-      bubbleChart.remove();
+      if (firstTime) {
+        bubbleChart.remove();
+      }
       renderBubble(2023, 3);
       yearToFilter = 2020;
       monthToFilter = 1;
@@ -539,7 +553,7 @@ Promise.all([
     const lineLegLabelSvg = lineLegend
       .append("svg")
       .attr("class", "line-legend-svg")
-      .attr("width", 120)
+      .attr("width", 125)
       .attr("height", 50);
 
     lineLegendSvg
@@ -569,7 +583,7 @@ Promise.all([
       .attr("class", "line-leglabel-death-rate")
       .attr("x", 15)
       .attr("y", 12)
-      .text("Death rate")
+      .text("Outbreak Severity")
       .style("font-size", "15px")
       .attr("alignment-baseline", "middle");
 
@@ -677,17 +691,31 @@ Promise.all([
       d.new_deaths = isNaN(parseFloat(+d.new_deaths))
         ? 0
         : parseFloat(+d.new_deaths);
+      d.new_deaths_per_million = isNaN(parseFloat(+d.new_deaths_per_million))
+        ? 0
+        : parseFloat(+d.new_deaths_per_million);
       d.total_deaths = isNaN(parseFloat(+d.total_deaths))
         ? 0
         : parseFloat(+d.total_deaths);
       d.new_cases = isNaN(parseFloat(+d.new_cases))
         ? 0
         : parseFloat(+d.new_cases);
+      d.new_cases_per_million = isNaN(parseFloat(+d.new_cases_per_million))
+        ? 0
+        : parseFloat(+d.new_cases_per_million);
       d.total_cases = isNaN(parseFloat(+d.total_cases))
         ? 0
         : parseFloat(+d.total_cases);
       d.death_rate = d.new_cases == 0 ? 0 : (d.new_deaths / d.new_cases) * 100;
+      d.death_rate1 =
+        d.new_cases_per_million == 0
+          ? 0
+          : (d.new_deaths_per_million / d.new_cases_per_million) * 100;
       if (isNaN(+d.death_rate) || isNaN(+d.vacc_rate)) {
+        console.log("Something WRONG!!!!!");
+        console.log(d);
+      }
+      if (isNaN(+d.death_rate1) || isNaN(+d.vacc_rate)) {
         console.log("Something WRONG!!!!!");
         console.log(d);
       }
@@ -704,7 +732,7 @@ Promise.all([
     lineyScale.domain([
       0.0001,
       d3.max(countryData, function (d) {
-        return d3.max([(d.death_rate, d.vacc_rate)]);
+        return d3.max([(d.death_rate1, d.vacc_rate)]);
       }),
     ]);
 
@@ -727,6 +755,8 @@ Promise.all([
       .duration(1000)
       .call(d3.axisLeft(lineyScale).ticks(5).tickFormat(d3.format(".0%")));
 
+    const curvetype = d3.curveCatmullRom;
+
     // Define line functions for death and vaccination rates
     const deathLineFunction = d3
       .line() //.area()
@@ -737,9 +767,9 @@ Promise.all([
       })
       //.y0(lineHeight)
       .y(function (d) {
-        return lineyScale(d.death_rate === 0 ? 0.0001 : d.death_rate);
+        return lineyScale(d.death_rate1 === 0 ? 0.0001 : d.death_rate1);
       })
-      .curve(d3.curveMonotoneX);
+      .curve(curvetype);
 
     const vaccinationLineFunction = d3
       .line() //.area()
@@ -750,7 +780,7 @@ Promise.all([
       .y(function (d) {
         return lineyScale(d.vacc_rate === 0 ? 0.0001 : d.vacc_rate);
       })
-      .curve(d3.curveMonotoneX);
+      .curve(curvetype);
 
     // Update death line with data
     deathLine.datum(countryData).attr("d", deathLineFunction);
@@ -764,7 +794,7 @@ Promise.all([
   function renderBubble(year, month) {
     console.log("month and year in renderBubble: " + month + "," + year);
 
-    dataForAMonth_b = filterData(month, year, monthly);
+    var dataForAMonth_b = filterData(month, year, monthly);
 
     var myDataForAMonth_b = dataForAMonth_b.filter(function (d) {
       //console.log(d.iso_code);
@@ -786,9 +816,9 @@ Promise.all([
       .scaleLog()
       .domain([
         d3.min(myDataForAMonth_b, (d) => {
-          return d.total_cases > 0 ? d.total_cases : 0.1;
+          return d.new_cases > 0 ? d.new_cases : 0.1;
         }),
-        d3.max(myDataForAMonth_b, (d) => d.total_cases) * 10,
+        d3.max(myDataForAMonth_b, (d) => d.new_cases) * 10,
       ])
       .range([bubbleHeight, 0]);
 
@@ -831,7 +861,7 @@ Promise.all([
       .attr("text-anchor", "middle")
       .attr("class", "bubble-title-c")
       .attr("id", "covid-response")
-      .text("Impact of Stringency Measures");
+      .text("Impact of Stringency & Population");
 
     bubbleChart
       .selectAll("circle")
@@ -841,7 +871,7 @@ Promise.all([
       .attr("class", "countrybubbles")
       .attr("cx", (d) => bubbleX(d.stringency_index))
       .attr("cy", (d) =>
-        d.total_cases == 0 ? bubbleY(0.1) : bubbleY(d.total_cases)
+        d.new_cases == 0 ? bubbleY(0.1) : bubbleY(d.new_cases)
       )
       .transition()
       .duration(500)
@@ -857,10 +887,11 @@ Promise.all([
 
     bubbleChart
       .append("g")
+      .attr("class", "bubble-xaxis")
       .attr("transform", `translate(0, ${bubbleHeight})`)
       .call(xAxis);
 
-    bubbleChart.append("g").call(yAxis);
+    bubbleChart.append("g").attr("class", "bubble-yaxis").call(yAxis);
 
     bubbleChart
       .append("text")
@@ -879,7 +910,7 @@ Promise.all([
       .attr("text-anchor", "middle")
       .attr("class", "bubble-yaxis-c")
       .attr("id", "total-cases")
-      .text("Total Cases");
+      .text("New Cases");
 
     d3.selectAll(".countrybubbles")
       .on("mouseover", function (event, d) {
@@ -889,13 +920,17 @@ Promise.all([
         bubbletooltip
           .html(
             "<div class=bubbletooltip-text>" +
+              "<strong>" +
               d.location +
-              "<br> Cases: " +
+              "</strong>" +
+              "<br> Total Cases: " +
               (typeof d.total_cases == "undefined"
                 ? 0
                 : d.total_cases.toFixed(0)) +
+              "<br> Stringency Index: " +
+              Math.ceil(d.stringency_index) +
               "<br> Population Density: " +
-              d.population_density +
+              Math.ceil(d.population_density) +
               "</div>"
           )
           .style("left", event.pageX + 2 + "px")
@@ -947,6 +982,7 @@ Promise.all([
         updateChart(dropdown.property("value"));
       });
 
+    console.log("Incrementing firstTime");
     firstTime++;
   }
 
@@ -970,7 +1006,7 @@ Promise.all([
   // callback function for the brush
   function brushed(event) {
     console.log(myIsoCodes);
-    myIsoCodes_orig = myIsoCodes;
+    var myIsoCodes_orig = myIsoCodes;
     myIsoCodes = myIsoCodes.filter((d) => false);
     // console.log("brushed array: ");
     // console.log(myIsoCodes);

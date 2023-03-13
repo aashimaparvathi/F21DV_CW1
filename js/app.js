@@ -1,30 +1,18 @@
 import { drawHeatmap } from "./heatmap.js";
+import { drawLineChart } from "./linechart.js";
+import { renderLineChart } from "./linechart.js";
+import { updateLineChart } from "./linechart.js";
+import { renderBubbleChart } from "./bubblechart.js";
 
 // Define the dimensions and margins of the plot
 var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   bubbleMargin = { top: 20, bottom: 50, left: 50, right: 30 },
-  lineMargin = { top: 5, bottom: 45, left: 0, right: 30 },
   svgWidth = 800 - margin.left - margin.right,
   svgHeight = 500 - margin.top - margin.bottom,
   bubbleWidth = 450 - bubbleMargin.left - bubbleMargin.right,
   bubbleHeight = 500 - bubbleMargin.top - bubbleMargin.bottom,
-  lineWidth = 1250 - lineMargin.left - lineMargin.right,
-  lineHeight = 290 - lineMargin.top - lineMargin.bottom,
   bubbleChart,
   readyForBubble = 0,
-  bubbleX,
-  bubbleY,
-  bubbleTickFormatter,
-  bubbleR,
-  bubbleColor,
-  bubbleID,
-  bubbleIsoCode,
-  dropdown,
-  linexScale,
-  lineyScale,
-  deathLine,
-  vaccinationLine,
-  firstTime = 0,
   wave1year = 2020,
   wave1month = 3,
   wave2year = 2021,
@@ -34,21 +22,19 @@ var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   dataForAMonth_g = {}; // global variable;
 const intervalDelay = 10; // change intervalDelay back to 1000 later
 // Create a mapping object to store iso_code -> country_name mapping
-const isoToCountry = {};
+var isoToCountry = {};
 var gdpData = {};
 export { gdpData };
+
+var bubbleSvg;
+export { bubbleSvg };
+
+var myIsoCodes = ["USA", "CHN", "AUS", "GUY", "CAF", "VUT", "GRL", "PHL"];
 
 const tooltip = d3
   .select("body")
   .append("div")
   .attr("class", "tooltip-c")
-  .style("opacity", 0)
-  .style("position", "absolute");
-
-const bubbletooltip = d3
-  .select("body")
-  .append("div")
-  .attr("class", "bubbletooltip-c")
   .style("opacity", 0)
   .style("position", "absolute");
 
@@ -60,8 +46,6 @@ let locationImage = d3
   .style("position", "absolute")
   .style("pointer-events", "none")
   .style("opacity", 0);
-
-var myIsoCodes = ["USA", "CHN", "AUS", "GUY", "CAF", "VUT", "GRL", "PHL"];
 
 const group = d3
   .select("body")
@@ -79,13 +63,6 @@ var svg = group
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-// group
-//   .append("div")
-//   .attr("id", "info-container")
-//   .style("width", svgWidth / 2 + "px")
-//   .style("height", "20px")
-//   .style("display", "inline-block");
-
 group
   .append("g")
   .attr("id", "play-c")
@@ -101,7 +78,7 @@ var nextgroup = d3
   .attr("class", "bubblegroup-c")
   .attr("id", "bubblegroup");
 
-const bubbleSvg = nextgroup
+bubbleSvg = nextgroup
   .append("svg")
   .attr("width", bubbleWidth + bubbleMargin.left + bubbleMargin.right)
   .attr("height", bubbleHeight + bubbleMargin.top + bubbleMargin.bottom);
@@ -118,24 +95,7 @@ var gdpGroup = d3
   .attr("class", "gdpgroup-c")
   .attr("id", "gdpgroup");
 
-const container = lineGroup.append("div").attr("class", "dropdown-container");
-
-var lineSvg = lineGroup
-  .append("svg")
-  .attr("width", lineWidth + lineMargin.left + lineMargin.right)
-  .attr("height", lineHeight + lineMargin.top + lineMargin.bottom)
-  .append("g")
-  .attr(
-    "transform",
-    "translate(" + lineMargin.left + 230 + "," + lineMargin.top + ")"
-  );
-
-// var gdpSvg = gdpGroup
-//   .append("svg")
-//   .attr("width", gdpWidth + gdpMargin.left + gdpMargin.right)
-//   .attr("height", gdpHeight + gdpMargin.top + gdpMargin.bottom)
-//   .append("g")
-//   .attr("transform", "translate(" + gdpMargin.left + "," + gdpMargin.top + ")");
+drawLineChart("linegroup");
 
 // Create projection to map the latitudes and longitudes to x and y
 const projection = d3
@@ -150,7 +110,7 @@ const path = d3.geoPath().projection(projection);
 const formatNumber = d3.format(".2s");
 const formatTime = d3.timeFormat("%B, %Y");
 
-function filterData(month, year, data) {
+export function filterData(month, year, data) {
   //console.log(data);
   const dataForAMonth = data.filter(
     (d) => d.year === year && d.month === month
@@ -344,7 +304,9 @@ Promise.all([
     .attr("stroke", "#aaaaaa")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  renderBubble(yearToFilter, monthToFilter);
+  renderBubbleChart(yearToFilter, monthToFilter, monthly, myIsoCodes);
+
+  bubbleChart = d3.select("#bubblechart");
   var dataForAMonth = monthly.filter(
     (d) => d.year === yearToFilter && d.month === monthToFilter
   );
@@ -363,8 +325,8 @@ Promise.all([
     .attr("height", 20)
     .attr("opacity", 0);
 
-  renderLineChart(dataMap);
-  updateChart();
+  renderLineChart(dataMap, svgHeight);
+  updateLineChart();
 
   // Set up the play button
   const button = d3.select("#play-button");
@@ -415,9 +377,11 @@ Promise.all([
       clearInterval(intervalId);
       intervalId = null;
       button.text("▶");
-      if (firstTime) {
+
+      if (bubbleChart) {
         bubbleChart.remove();
       }
+
       if (monthToFilter == 1) {
         monthToFilter = 12;
         yearToFilter--;
@@ -425,7 +389,7 @@ Promise.all([
         monthToFilter--;
       }
 
-      renderBubble(yearToFilter, monthToFilter);
+      renderBubbleChart(yearToFilter, monthToFilter, monthly, myIsoCodes);
     } else if (count < maxCount) {
       console.log("STARTED");
       intervalId = setInterval(intervalFunction, intervalDelay);
@@ -474,10 +438,11 @@ Promise.all([
       intervalId = 0;
       count = 0;
       readyForBubble = 1;
-      if (firstTime) {
+      if (bubbleChart) {
         bubbleChart.remove();
       }
-      renderBubble(2023, 3);
+
+      renderBubbleChart(2023, 3, monthly, myIsoCodes);
       yearToFilter = 2020;
       monthToFilter = 1;
     }
@@ -509,483 +474,6 @@ Promise.all([
   }
 
   // ---------------------------------------------------------------------------------------------------
-
-  function renderLineChart(dataMap) {
-    // Create an array of country names for the dropdown menu
-    var location_fromDataMap = Array.from(dataMap.keys());
-    console.log(location_fromDataMap);
-
-    dropdown = container
-      .append("select")
-      .attr("class", "dropdown-c")
-      .attr("id", "dropdownmenu")
-      .style("position", "relative")
-      .style("top", "19.5px") // adjust the top position as needed
-      .style("left", "15px") // adjust the left position as needed
-      .style("width", "160px")
-      .style("height", "50px")
-      .style("padding", "10px");
-
-    // Legend
-    const lineLegend = container
-      .append("g")
-      .attr("class", "linelegend-c")
-      .style("position", "absolute")
-      .style("top", svgHeight + lineHeight / 2 + 100 + "px") // adjust the top position as needed
-      .style("left", "15px") // adjust the left position as needed
-      .style("width", "220px")
-      .style("height", "120px")
-      .style("padding", "10px");
-    //.attr("transform", `translate(${lineWidth - 100},${lineHeight - 100})`);
-
-    const lineColor = {
-      death_rate: "#ad001ac7",
-      vaccination_rate: "#029ac1c7",
-    };
-
-    // add a rectangle for the death rate line
-    const lineLegendSvg = lineLegend
-      .append("svg")
-      .attr("class", "line-legend-svg")
-      .attr("width", 22)
-      .attr("height", 50);
-
-    const lineLegLabelSvg = lineLegend
-      .append("svg")
-      .attr("class", "line-legend-svg")
-      .attr("width", 125)
-      .attr("height", 50);
-
-    lineLegendSvg
-      .append("rect")
-      .attr("class", "line-leg-death-rate")
-      .attr("x", 1)
-      .attr("y", 1)
-      .attr("width", 20)
-      .attr("height", 20)
-      .attr("rx", 5)
-      .attr("fill", lineColor.death_rate);
-
-    // add a rectangle for the vaccination rate line
-    lineLegendSvg
-      .append("rect")
-      .attr("class", "line-leg-vacc-rate")
-      .attr("x", 1)
-      .attr("y", 23)
-      .attr("width", 20)
-      .attr("height", 20)
-      .attr("rx", 5)
-      .attr("fill", lineColor.vaccination_rate);
-
-    // add text labels for the lines
-    lineLegLabelSvg
-      .append("text")
-      .attr("class", "line-leglabel-death-rate")
-      .attr("x", 15)
-      .attr("y", 12)
-      .text("Outbreak Severity")
-      .style("font-size", "15px")
-      .attr("alignment-baseline", "middle");
-
-    lineLegLabelSvg
-      .append("text")
-      .attr("class", "line-leglabel-vacc-rate")
-      .attr("x", 15)
-      .attr("y", 35)
-      .text("Vaccination rate")
-      .style("font-size", "15px")
-      .attr("alignment-baseline", "middle");
-
-    dropdown
-      .selectAll("option")
-      .data(dataMap)
-      .enter()
-      .append("option")
-      .text(function (d, i) {
-        //console.log(Array.from(d)[0]);
-        return Array.from(d)[0];
-      })
-      .attr("value", function (d) {
-        //console.log(Array.from(d)[1]);
-        return Array.from(d)[0];
-      });
-
-    // Create scales for the x and y axes
-    linexScale = d3
-      .scaleTime()
-      .domain([new Date(2020, 1), new Date(2021, 2)])
-      .range([0, lineWidth - 230]);
-
-    lineyScale = d3.scaleLog().domain([0.0001, 100]).range([lineHeight, 0]);
-
-    // Add death line to line chart
-    deathLine = lineSvg.append("path").attr("class", "death-line");
-
-    // Add vaccination line to line chart
-    vaccinationLine = lineSvg.append("path").attr("class", "vaccination-line");
-
-    const xAxis = d3.axisBottom(linexScale);
-    const yAxis = d3.axisLeft(lineyScale);
-
-    // Add the x and y axes
-    lineSvg
-      .append("g")
-      .attr("class", "x-axis")
-      .attr("transform", "translate(0," + lineHeight + ")")
-      .call(
-        xAxis.tickFormat(d3.timeFormat("%b, %y")).ticks(d3.timeMonth.every(1))
-      );
-
-    lineSvg
-      .append("g")
-      .attr("class", "y-axis")
-      .call(yAxis.ticks(6).tickFormat(d3.format(".0%")));
-
-    // Add labels for the axes
-    lineSvg
-      .append("text")
-      .attr("class", "y-axis-text")
-      .attr("text-anchor", "left")
-      .attr(
-        "transform",
-        "translate(" +
-          lineWidth / 2.5 +
-          "," +
-          (lineHeight + lineMargin.bottom / 2 + 15 + ")")
-      )
-      .text("Time");
-
-    lineSvg
-      .append("text")
-      .attr("class", "x-axis-text")
-      .attr("text-anchor", "middle")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 0 - lineMargin.left)
-      .attr("x", 0 - lineHeight / 2)
-      .attr("dy", "1em")
-      .text("Rate (%)");
-
-    dropdown.on("change", updateChart);
-  }
-
-  // Define a function to update the chart
-  function updateChart() {
-    console.log("In updateChart function:");
-    var country = dropdown.property("value");
-    var countryData = dataMap.get(country);
-    console.log(country);
-    console.log(countryData);
-
-    countryData.forEach(function (d) {
-      d.year = +d.year;
-      d.month = +d.month;
-      d.total_vaccinations = isNaN(parseFloat(+d.total_vaccinations))
-        ? 0
-        : parseFloat(+d.total_vaccinations);
-      d.population = isNaN(parseFloat(+d.population))
-        ? 0
-        : parseFloat(d.population);
-      d.vacc_rate = isNaN(parseFloat(+d.vacc_rate))
-        ? 0
-        : parseFloat(+d.vacc_rate);
-      d.new_deaths = isNaN(parseFloat(+d.new_deaths))
-        ? 0
-        : parseFloat(+d.new_deaths);
-      d.new_deaths_per_million = isNaN(parseFloat(+d.new_deaths_per_million))
-        ? 0
-        : parseFloat(+d.new_deaths_per_million);
-      d.total_deaths = isNaN(parseFloat(+d.total_deaths))
-        ? 0
-        : parseFloat(+d.total_deaths);
-      d.new_cases = isNaN(parseFloat(+d.new_cases))
-        ? 0
-        : parseFloat(+d.new_cases);
-      d.new_cases_per_million = isNaN(parseFloat(+d.new_cases_per_million))
-        ? 0
-        : parseFloat(+d.new_cases_per_million);
-      d.total_cases = isNaN(parseFloat(+d.total_cases))
-        ? 0
-        : parseFloat(+d.total_cases);
-      d.death_rate = d.new_cases == 0 ? 0 : (d.new_deaths / d.new_cases) * 100;
-      d.death_rate1 =
-        d.new_cases_per_million == 0
-          ? 0
-          : (d.new_deaths_per_million / d.new_cases_per_million) * 100;
-      if (isNaN(+d.death_rate) || isNaN(+d.vacc_rate)) {
-        console.log("Something WRONG!!!!!");
-        console.log(d);
-      }
-      if (isNaN(+d.death_rate1) || isNaN(+d.vacc_rate)) {
-        console.log("Something WRONG!!!!!");
-        console.log(d);
-      }
-    });
-
-    // Update the x scale domain
-    linexScale.domain(
-      d3.extent(countryData, function (d) {
-        return new Date(d.year, d.month - 1);
-      })
-    );
-
-    // Update the y scale domain
-    lineyScale.domain([
-      0.0001,
-      d3.max(countryData, function (d) {
-        return d3.max([(d.death_rate1, d.vacc_rate)]);
-      }),
-    ]);
-
-    // Update the x axis
-    lineSvg
-      .select(".x-axis")
-      .transition()
-      .duration(1000)
-      .call(
-        d3
-          .axisBottom(linexScale)
-          .tickFormat(d3.timeFormat("%b, %y"))
-          .ticks(d3.timeMonth.every(2))
-      );
-
-    // Update the y axis
-    lineSvg
-      .select(".y-axis")
-      .transition()
-      .duration(1000)
-      .call(d3.axisLeft(lineyScale).ticks(5).tickFormat(d3.format(".0%")));
-
-    const curvetype = d3.curveCatmullRom;
-
-    // Define line functions for death and vaccination rates
-    const deathLineFunction = d3
-      .line() //.area()
-      .x(function (d) {
-        var xdate = new Date(d.year, d.month - 1);
-        console.log(xdate);
-        return linexScale(xdate);
-      })
-      //.y0(lineHeight)
-      .y(function (d) {
-        return lineyScale(d.death_rate1 === 0 ? 0.0001 : d.death_rate1);
-      })
-      .curve(curvetype);
-
-    const vaccinationLineFunction = d3
-      .line() //.area()
-      .x(function (d) {
-        return linexScale(new Date(d.year, d.month - 1));
-      })
-      //.y0(lineHeight)
-      .y(function (d) {
-        return lineyScale(d.vacc_rate === 0 ? 0.0001 : d.vacc_rate);
-      })
-      .curve(curvetype);
-
-    // Update death line with data
-    deathLine.datum(countryData).attr("d", deathLineFunction);
-
-    // Update vaccination line with data
-    vaccinationLine.datum(countryData).attr("d", vaccinationLineFunction);
-  }
-
-  // ---------------------------------------------------------------------------------------------------
-
-  function renderBubble(year, month) {
-    console.log("month and year in renderBubble: " + month + "," + year);
-
-    var dataForAMonth_b = filterData(month, year, monthly);
-
-    var myDataForAMonth_b = dataForAMonth_b.filter(function (d) {
-      //console.log(d.iso_code);
-      return myIsoCodes.includes(d.iso_code);
-    });
-
-    console.log(myDataForAMonth_b);
-
-    bubbleX = d3
-      .scaleLinear()
-      .domain([
-        0,
-        //d3.min(myDataForAMonth_b, (d) => d.stringency_index),
-        d3.max(myDataForAMonth_b, (d) => d.stringency_index) * 1.5,
-      ])
-      .range([0, bubbleWidth]);
-
-    bubbleY = d3
-      .scaleLog()
-      .domain([
-        d3.min(myDataForAMonth_b, (d) => {
-          return d.new_cases > 0 ? d.new_cases : 0.1;
-        }),
-        d3.max(myDataForAMonth_b, (d) => d.new_cases) * 10,
-      ])
-      .range([bubbleHeight, 0]);
-
-    // Create a tick formatter function that formats the ticks uniformly
-    bubbleTickFormatter = bubbleY.tickFormat(10, "~s");
-
-    bubbleR = d3
-      .scaleLinear()
-      .domain([0, d3.max(myDataForAMonth_b, (d) => d.population_density)])
-      .range([20, 60]);
-
-    /* For reference: ["USA", "CHN", "AUS", "GUY", "CAF"]; */
-    bubbleColor = d3
-      .scaleOrdinal()
-      .domain(myIsoCodes)
-      .range(d3.schemeCategory10);
-    //      .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#42ecff", "#9467bd"]);
-
-    function countryColor(iso_code) {
-      return iso_code === "USA" ||
-        iso_code === "CHN" ||
-        iso_code === "AUS" ||
-        iso_code === "GUY" ||
-        iso_code === "CAF"
-        ? bubbleColor(iso_code)
-        : "#7f7f7f";
-    }
-
-    bubbleChart = bubbleSvg
-      .append("g")
-      .attr(
-        "transform",
-        "translate(" + bubbleMargin.left + "," + bubbleMargin.top + ")"
-      );
-
-    bubbleSvg
-      .append("text")
-      .attr("x", bubbleWidth / 2 + bubbleMargin.left + 20)
-      .attr("y", bubbleMargin.top + 10 / 2)
-      .attr("text-anchor", "middle")
-      .attr("class", "bubble-title-c")
-      .attr("id", "covid-response")
-      .text("Impact of Stringency & Population");
-
-    bubbleChart
-      .selectAll("circle")
-      .data(myDataForAMonth_b)
-      .join("circle")
-      .attr("id", (d) => d.iso_code + "-bubble")
-      .attr("class", "countrybubbles")
-      .attr("cx", (d) => bubbleX(d.stringency_index))
-      .attr("cy", (d) =>
-        d.new_cases == 0 ? bubbleY(0.1) : bubbleY(d.new_cases)
-      )
-      .transition()
-      .duration(500)
-      .delay((d, i) => i * 100)
-      .attr("r", (d) => bubbleR(d.population_density))
-      .attr("stroke", (d) => bubbleColor(d.iso_code))
-      .attr("fill", (d) => bubbleColor(d.iso_code))
-      .attr("fill-opacity", "0.1")
-      .attr("stroke-opacity", "0.9");
-
-    const xAxis = d3.axisBottom(bubbleX);
-    const yAxis = d3.axisLeft(bubbleY).tickFormat(bubbleTickFormatter);
-
-    bubbleChart
-      .append("g")
-      .attr("class", "bubble-xaxis")
-      .attr("transform", `translate(0, ${bubbleHeight})`)
-      .call(xAxis);
-
-    bubbleChart.append("g").attr("class", "bubble-yaxis").call(yAxis);
-
-    bubbleChart
-      .append("text")
-      .attr("x", bubbleWidth / 2)
-      .attr("y", bubbleHeight + bubbleMargin.top + bubbleMargin.bottom / 2 - 2)
-      .attr("text-anchor", "middle")
-      .attr("class", "bubble-xaxis-c")
-      .attr("id", "stringency-index")
-      .text("Stringency Index");
-
-    bubbleChart
-      .append("text")
-      .attr("x", -bubbleHeight / 2)
-      .attr("y", -bubbleMargin.left + 10)
-      .attr("transform", "rotate(-90)")
-      .attr("text-anchor", "middle")
-      .attr("class", "bubble-yaxis-c")
-      .attr("id", "total-cases")
-      .text("New Cases");
-
-    d3.selectAll(".countrybubbles")
-      .on("mouseover", function (event, d) {
-        (bubbleID = d3.select(this).attr("id")), (bubbleIsoCode = d.iso_code);
-        console.log(bubbleID + ", " + bubbleIsoCode);
-        d3.select(this).style("opacity", 0.7);
-        bubbletooltip
-          .html(
-            "<div class=bubbletooltip-text>" +
-              "<strong>" +
-              d.location +
-              "</strong>" +
-              "<br> Total Cases: " +
-              (typeof d.total_cases == "undefined"
-                ? 0
-                : d.total_cases.toFixed(0)) +
-              "<br> Stringency Index: " +
-              Math.ceil(d.stringency_index) +
-              "<br> Population Density: " +
-              Math.ceil(d.population_density) +
-              "</div>"
-          )
-          .style("left", event.pageX + 2 + "px")
-          .style("top", event.pageY + 2 + "px")
-          .style("position", "absolute")
-          .style("padding", "0 5px") // This means 0px at the top and bottom
-          // and 10 on the left and right
-          .style("background-color", "white")
-          .style("border-color", function (d) {
-            var color = d3.color(bubbleColor(bubbleIsoCode));
-            color.opacity = 0.5;
-            return color.toString();
-          })
-          .style("border-style", "solid")
-          .style("border-width", "1px")
-          .style("border-radius", "10px")
-          .transition()
-          .duration(100)
-          .style("opacity", 1);
-
-        countryColor = d3.select("#" + bubbleIsoCode).attr("fill");
-
-        d3.select("#" + bubbleIsoCode)
-          .classed("country-highlight", true)
-          .attr("stroke", bubbleColor(bubbleIsoCode))
-          .attr("fill", bubbleColor(bubbleIsoCode));
-      })
-      .on("mouseout", function (event, d) {
-        d3.select(this).style("opacity", 1);
-        bubbletooltip.transition().duration(0).style("opacity", 0);
-
-        d3.select("#" + bubbleIsoCode)
-          .classed("country-highlight", false)
-          .attr("stroke", "none")
-          .attr("fill", countryColor);
-
-        // locationImage.style("opacity", 0);
-      })
-      .on("click", function () {
-        // get the dropdown element
-        const dropdown = d3.select("#dropdownmenu");
-        const value = isoToCountry[bubbleIsoCode];
-        console.log("Country value: " + value);
-
-        // set the value of the dropdown to a specific country
-        dropdown.property("value", value);
-
-        // call the updateChart function with the new dropdown value
-        updateChart(dropdown.property("value"));
-      });
-
-    console.log("Incrementing firstTime");
-    firstTime++;
-  }
-
   // ---------------------------------------------------------------------------------------------------
 
   const brush = d3
@@ -1047,7 +535,8 @@ Promise.all([
       if (bubbleChart) {
         bubbleChart.remove();
       }
-      renderBubble(yearToFilter, monthToFilter);
+
+      renderBubbleChart(yearToFilter, monthToFilter, monthly, myIsoCodes);
     } else {
       myIsoCodes = myIsoCodes_orig.filter((d) => true);
     }

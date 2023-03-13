@@ -20,7 +20,7 @@ var x,
   color1,
   color2;
 
-// Define your heatmap function
+// Define heatmap function
 export function drawHeatmap(containerId) {
   console.log("heatmap.js");
 
@@ -84,6 +84,7 @@ export function drawHeatmap(containerId) {
       total_deaths_per_million: +d.total_deaths_per_million,
       new_cases_per_million: +d.new_cases_per_million,
       country: d.location,
+      iso_code: d.iso_code,
     };
   });
 
@@ -276,6 +277,7 @@ function renderHeatMap(what, containerId, gdpData_fixed1) {
         .enter()
         .append("rect")
         .attr("class", "deaths-rect")
+        .attr("id", (d) => "deaths-rect" + d.iso_code)
         .attr("x", (d) => x(d.gdp_per_capita / 1000))
         .attr("y", (d) => y_gen(d.total_deaths_per_million))
         .attr("width", x(10) - x(0))
@@ -288,7 +290,6 @@ function renderHeatMap(what, containerId, gdpData_fixed1) {
           toggleTooltip(event, d, off);
         });
 
-      // const rect = d3.select("#deaths-rect-QAT");
       // rect
       //   .append("image")
       //   .attr("class", "tooltip-image")
@@ -339,6 +340,7 @@ function renderHeatMap(what, containerId, gdpData_fixed1) {
         .enter()
         .append("rect")
         .attr("class", "cases-rect")
+        .attr("id", (d) => "cases-rect" + d.iso_code)
         .attr("x", (d) => x(d.gdp_per_capita / 1000))
         .attr("y", (d) => y_gen(d.new_cases_per_million))
         .attr("width", x(10) - x(0))
@@ -393,6 +395,7 @@ function renderHeatMap(what, containerId, gdpData_fixed1) {
         .enter()
         .append("rect")
         .attr("class", "deaths-rect")
+        .attr("id", (d) => "deaths-rect" + d.iso_code)
         .attr("x", (d) => x(d.gdp_per_capita / 1000))
         .attr("y", (d) => y_gen(d.total_deaths_per_million))
         .attr("width", x(10) - x(0))
@@ -413,6 +416,7 @@ function renderHeatMap(what, containerId, gdpData_fixed1) {
         .enter()
         .append("rect")
         .attr("class", "cases-rect")
+        .attr("id", (d) => "cases-rect" + d.iso_code)
         .attr("x", (d) => x(d.gdp_per_capita / 1000))
         .attr("y", (d) => y_gen(d.new_cases_per_million))
         .attr("width", x(10) - x(0))
@@ -429,6 +433,9 @@ function renderHeatMap(what, containerId, gdpData_fixed1) {
       return "Total deaths / New cases (Per million)";
     }
   });
+
+  d3.select("#deaths-rectQAT").attr("stroke", "green");
+  d3.select("#cases-rectQAT").attr("stroke", "green");
 }
 
 function fixData(data) {

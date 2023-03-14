@@ -3,6 +3,8 @@ import { drawLineChart } from "./linechart.js";
 import { renderLineChart } from "./linechart.js";
 import { updateLineChart } from "./linechart.js";
 import { renderBubbleChart } from "./bubblechart.js";
+import { scatterPlot } from "./kmeans.js";
+import { kMeans2 } from "./kmeans.js";
 
 // Define the dimensions and margins of the plot
 var margin = { top: 80, right: 30, bottom: 30, left: 5 },
@@ -20,6 +22,10 @@ var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   wave3year = 2021,
   wave3month = 5,
   dataForAMonth_g = {}; // global variable;
+
+export { wave2month };
+export { wave2year };
+
 const intervalDelay = 10; // change intervalDelay back to 1000 later
 // Create a mapping object to store iso_code -> country_name mapping
 var isoToCountry = {};
@@ -95,6 +101,12 @@ var gdpGroup = d3
   .attr("class", "gdpgroup-c")
   .attr("id", "gdpgroup");
 
+var clusterGroup = d3
+  .select("body")
+  .append("g")
+  .attr("class", "clustergroup-c")
+  .attr("id", "clustergroup");
+
 drawLineChart("linegroup");
 
 // Create projection to map the latitudes and longitudes to x and y
@@ -160,20 +172,23 @@ Promise.all([
   d3.csv("./data/montly_per_continent.csv"),
   d3.csv("./data/monthly_all.csv"),
 ]).then(function ([world, monthly_per_continent, monthly]) {
-  console.log("world: ");
-  console.log(world);
-  console.log("monthly_per_continent: ");
-  console.log(monthly_per_continent);
-  console.log("monthly: ");
-  console.log(monthly);
+  // console.log("world: ");
+  // console.log(world);
+  // console.log("monthly_per_continent: ");
+  // console.log(monthly_per_continent);
+  // console.log("monthly: ");
+  // console.log(monthly);
+
+  scatterPlot(monthly, "clustergroup");
+  //kMeans2(5, 100, monthly, "clustergroup");
 
   // Create a map of country names to data for that country
   var dataMap = d3.group(monthly, function (d) {
     return d.location;
   });
 
-  console.log("DataMap:");
-  console.log(dataMap);
+  // console.log("DataMap:");
+  // console.log(dataMap);
 
   // Loop through the data and populate the mapping object
   monthly.forEach(function (d) {
@@ -493,7 +508,7 @@ Promise.all([
 
   // callback function for the brush
   function brushed(event) {
-    console.log(myIsoCodes);
+    //console.log(myIsoCodes);
     var myIsoCodes_orig = myIsoCodes;
     myIsoCodes = myIsoCodes.filter((d) => false);
     // console.log("brushed array: ");
@@ -521,8 +536,8 @@ Promise.all([
           return d.id;
         });
 
-      console.log("new brushed array: ");
-      console.log(myIsoCodes);
+      //console.log("new brushed array: ");
+      //console.log(myIsoCodes);
 
       // update the display to show the details of only those countries
       countries.attr("fill", function (d) {

@@ -65,7 +65,9 @@
 .bubble-xaxis-c,
 .bubble-yaxis-c,
 .y-axis-label,
-.x-axis-label {
+.x-axis-label,
+.scatter-y-label,
+.scatter-x-label {
   font-family: serif, Arial, Helvetica, sans-serif;
   font-size: 17px;
   fill: #db3915;
@@ -150,21 +152,24 @@
   height: 295px;
 }
 
-.gdp-dropdown-button {
+.gdp-dropdown-button,
+.scatter-dropdown-button {
   fill: white;
   stroke: #999999;
   stroke-width: 3px;
   cursor: pointer;
 }
 
-.gdp-dropdown-option {
+.gdp-dropdown-option,
+.scatter-dropdown-option {
   font-size: 13px;
   font-family: sans-serif;
   fill: #444444;
   cursor: pointer;
 }
 
-.gdp-dropdown-option:hover {
+.gdp-dropdown-option:hover,
+.scatter-dropdown-option:hover {
   font-weight: bold;
 }
 

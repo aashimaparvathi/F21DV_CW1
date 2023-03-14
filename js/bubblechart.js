@@ -40,15 +40,15 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
   });
 
   var dataForAMonth_b = filterData(month, year, monthly);
-  console.log(dataForAMonth_b);
-  console.log(myIsoCodes);
+  // console.log(dataForAMonth_b);
+  // console.log(myIsoCodes);
 
   var myDataForAMonth_b = dataForAMonth_b.filter(function (d) {
-    console.log(d.iso_code);
+    //console.log(d.iso_code);
     return myIsoCodes.includes(d.iso_code);
   });
 
-  console.log(myDataForAMonth_b);
+  //console.log(myDataForAMonth_b);
 
   bubbleX = d3
     .scaleLinear()
@@ -123,7 +123,7 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
     .attr("stroke", (d) => bubbleColor(d.iso_code))
     .attr("fill", (d) => bubbleColor(d.iso_code))
     .attr("fill-opacity", "0.1")
-    .attr("stroke-opacity", "0.9");
+    .attr("stroke-opacity", "1");
 
   const xAxis = d3.axisBottom(bubbleX);
   const yAxis = d3.axisLeft(bubbleY).tickFormat(bubbleTickFormatter);
@@ -158,7 +158,7 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
   d3.selectAll(".countrybubbles")
     .on("mouseover", function (event, d) {
       (bubbleID = d3.select(this).attr("id")), (bubbleIsoCode = d.iso_code);
-      console.log(bubbleID + ", " + bubbleIsoCode);
+      //console.log(bubbleID + ", " + bubbleIsoCode);
       d3.select(this).style("opacity", 0.7);
       bubbletooltip
         .html(
@@ -214,7 +214,7 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
       // get the dropdown element
       const dropdown = d3.select("#dropdownmenu");
       const value = isoToCountry[bubbleIsoCode];
-      console.log("Country value: " + value);
+      //console.log("Country value: " + value);
 
       // set the value of the dropdown to a specific country
       dropdown.property("value", value);
@@ -223,6 +223,6 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
       updateLineChart(dropdown.property("value"));
     });
 
-  console.log("Incrementing firstTime");
+  //console.log("Incrementing firstTime");
   firstTime++;
 }

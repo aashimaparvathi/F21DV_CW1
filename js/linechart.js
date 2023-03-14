@@ -34,7 +34,7 @@ export function renderLineChart(dataMap, svgHeight) {
 
   // Create an array of country names for the dropdown menu
   var location_fromDataMap = Array.from(dataMap.keys());
-  console.log(location_fromDataMap);
+  //console.log(location_fromDataMap);
 
   dropdown = container
     .append("select")
@@ -104,7 +104,7 @@ export function renderLineChart(dataMap, svgHeight) {
     .attr("class", "line-leglabel-death-rate")
     .attr("x", 15)
     .attr("y", 12)
-    .text("Outbreak Severity")
+    .text("Death Rate")
     .style("font-size", "15px")
     .attr("alignment-baseline", "middle");
 
@@ -113,7 +113,7 @@ export function renderLineChart(dataMap, svgHeight) {
     .attr("class", "line-leglabel-vacc-rate")
     .attr("x", 15)
     .attr("y", 35)
-    .text("Vaccination rate")
+    .text("Vaccination Rate")
     .style("font-size", "15px")
     .attr("alignment-baseline", "middle");
 
@@ -283,7 +283,7 @@ export function updateLineChart() {
     .line() //.area()
     .x(function (d) {
       var xdate = new Date(d.year, d.month - 1);
-      console.log(xdate);
+      //console.log(xdate);
       return linexScale(xdate);
     })
     //.y0(lineHeight)

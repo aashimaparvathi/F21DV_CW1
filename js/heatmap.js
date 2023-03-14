@@ -1,7 +1,7 @@
 import { gdpData } from "./app.js";
 
 const gdpMargin = { top: 10, bottom: 45, left: 40, right: 30 },
-  gdpWidth = 950 - gdpMargin.left - gdpMargin.right,
+  gdpWidth = 1000 - gdpMargin.left - gdpMargin.right,
   gdpHeight = 600 - gdpMargin.top - gdpMargin.bottom,
   on = 1,
   off = 0;
@@ -24,8 +24,8 @@ var x,
 export function drawHeatmap(containerId) {
   console.log("heatmap.js");
 
-  console.log("Input gdpData");
-  console.log(gdpData);
+  // console.log("Input gdpData");
+  // console.log(gdpData);
 
   gdptooltip = d3
     .select("#" + containerId)
@@ -42,8 +42,8 @@ export function drawHeatmap(containerId) {
     .style("display", "none");
 
   var gdpData_fixed = fixData(gdpData);
-  console.log("gdpData fixed");
-  console.log(gdpData_fixed);
+  // console.log("gdpData fixed");
+  // console.log(gdpData_fixed);
 
   // Data preprocessing
   const gdpData_reduced = gdpData_fixed.filter(
@@ -53,8 +53,8 @@ export function drawHeatmap(containerId) {
       d.new_cases_per_million > 100
   );
 
-  console.log("gdbData_reduced");
-  console.log(gdpData_reduced);
+  // console.log("gdbData_reduced");
+  // console.log(gdpData_reduced);
 
   const gdpArray = gdpData_reduced.map((obj) => obj.gdp_per_capita);
   const totalDeathsArray = gdpData_reduced.map(
@@ -62,10 +62,10 @@ export function drawHeatmap(containerId) {
   );
   const newCasesArray = gdpData_reduced.map((obj) => obj.new_cases_per_million);
 
-  console.log("gdpArray and totalDeathsArray");
-  console.log(gdpArray);
-  console.log(totalDeathsArray);
-  console.log(newCasesArray);
+  // console.log("gdpArray and totalDeathsArray");
+  // console.log(gdpArray);
+  // console.log(totalDeathsArray);
+  // console.log(newCasesArray);
 
   const gdpMin = d3.min(gdpArray);
   const gdpMax = d3.max(gdpArray);
@@ -74,9 +74,9 @@ export function drawHeatmap(containerId) {
   deathMax = d3.max(totalDeathsArray);
   casesMax = d3.max(newCasesArray);
 
-  console.log("gdp min and max: " + gdpMin + ", " + gdpMax);
-  console.log("total deaths min and max: " + deathMin + ", " + deathMax);
-  console.log("new cases min and max: " + casesMin + ", " + casesMax);
+  // console.log("gdp min and max: " + gdpMin + ", " + gdpMax);
+  // console.log("total deaths min and max: " + deathMin + ", " + deathMax);
+  // console.log("new cases min and max: " + casesMin + ", " + casesMax);
 
   const gdpData_fixed1 = gdpData_reduced.map((d) => {
     return {
@@ -88,8 +88,8 @@ export function drawHeatmap(containerId) {
     };
   });
 
-  console.log("gdpData_fixed1");
-  console.log(gdpData_fixed1);
+  // console.log("gdpData_fixed1");
+  // console.log(gdpData_fixed1);
 
   // Scales
   x = d3
@@ -228,7 +228,7 @@ export function drawHeatmap(containerId) {
 }
 
 function renderHeatMap(what, containerId, gdpData_fixed1) {
-  console.log(what);
+  //console.log(what);
 
   const svg = d3.select("#" + containerId);
   d3.select("#" + what).style("font-weight", "bold");
@@ -438,7 +438,7 @@ function renderHeatMap(what, containerId, gdpData_fixed1) {
   d3.select("#cases-rectQAT").attr("stroke", "green");
 }
 
-function fixData(data) {
+export function fixData(data) {
   data.forEach(function (d) {
     d.year = +d.year;
     d.month = +d.month;

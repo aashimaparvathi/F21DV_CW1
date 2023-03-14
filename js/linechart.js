@@ -1,4 +1,4 @@
-const lineMargin = { top: 5, bottom: 45, left: 0, right: 30 },
+const lineMargin = { top: 20, bottom: 40, left: 0, right: 30 },
   lineWidth = 1250 - lineMargin.left - lineMargin.right,
   lineHeight = 290 - lineMargin.top - lineMargin.bottom;
 
@@ -14,7 +14,13 @@ var dropdown,
 export function drawLineChart(containerId) {
   const lineGroup = d3.select("#" + containerId);
 
-  const container = lineGroup.append("div").attr("class", "dropdown-container");
+  const container = lineGroup
+    .append("g")
+    .attr("class", "dropdown-container")
+    .attr(
+      "transform",
+      "translate(" + lineMargin.left + 230 + "," + lineMargin.top + ")"
+    );
 
   lineSvg = lineGroup
     .append("svg")
@@ -41,11 +47,11 @@ export function renderLineChart(dataMap, svgHeight) {
     .attr("class", "dropdown-c")
     .attr("id", "dropdownmenu")
     .style("position", "relative")
-    .style("top", "19.5px") // adjust the top position as needed
+    .style("top", "50px") // adjust the top position as needed
     .style("left", "15px") // adjust the left position as needed
     .style("width", "160px")
-    .style("height", "50px")
-    .style("padding", "10px");
+    .style("height", "120px")
+    .style("padding", "20px");
 
   // Legend
   const lineLegend = container

@@ -148,7 +148,7 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
   bubbleChart
     .append("text")
     .attr("x", -bubbleHeight / 2)
-    .attr("y", -bubbleMargin.left + 10)
+    .attr("y", -bubbleMargin.left + 15)
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "middle")
     .attr("class", "bubble-yaxis-c")

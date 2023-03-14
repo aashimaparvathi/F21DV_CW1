@@ -1,6 +1,12 @@
 import { fixData } from "./heatmap.js";
-import { wave2month } from "./app.js";
-import { wave2year } from "./app.js";
+import {
+  wave1year,
+  wave2year,
+  wave3year,
+  wave1month,
+  wave2month,
+  wave3month,
+} from "./app.js";
 
 const margin = { top: 10, bottom: 45, left: 90, right: 30 },
   width = 1000 - margin.left - margin.right,
@@ -9,7 +15,7 @@ const margin = { top: 10, bottom: 45, left: 90, right: 30 },
 var svg;
 
 function kMeans(k, maxIterations, featureVectors) {
-  console.log("kMeans Program!!");
+  // console.log("kMeans Program!!");
 
   // Randomly initialize the centroids
   var centroids = d3.range(k).map(function (i) {
@@ -33,8 +39,8 @@ function kMeans(k, maxIterations, featureVectors) {
     ];
   });
 
-  console.log("Initialized centroids");
-  console.log(centroids);
+  // console.log("Initialized centroids");
+  // console.log(centroids);
 
   for (var iteration = 0; iteration < maxIterations; iteration++) {
     // Assign each point to its closest centroid
@@ -63,7 +69,7 @@ function kMeans(k, maxIterations, featureVectors) {
           }),
         ];
       } else {
-        console.log(centroid);
+        // console.log(centroid);
         return centroid;
       }
     });
@@ -92,22 +98,23 @@ function kMeans(k, maxIterations, featureVectors) {
   });
 
   // Return the assignments and centroids
-  console.log("assignments");
-  console.log(assignments);
-  console.log("centroids");
-  console.log(centroids);
+  // console.log("assignments");
+  // console.log(assignments);
+  // console.log("centroids");
+  // console.log(centroids);
   return { assignments: assignments, centroids: centroids };
 }
 
 export function scatterPlot(monthly, containerId) {
   const gdpData = monthly.filter(
-    (d) => +d.year === wave2year && +d.month === wave2month
+    (d) =>
+      (+d.year === wave1year && +d.month === wave1month) ||
+      (+d.year === wave2year && +d.month === wave2month) ||
+      (+d.year === wave3year && +d.month === wave3month)
   );
-  console.log("gdpData for heatmap.js:");
-  console.log(gdpData);
 
-  //const data = fixData(gdpData);
-  const data = fixData(monthly);
+  const data = fixData(gdpData);
+  // const data = fixData(monthly);
 
   const scattertooltip = d3
     .select("#" + containerId)
@@ -131,17 +138,22 @@ export function scatterPlot(monthly, containerId) {
     .append("svg")
     .attr("class", "scatter-dropdown")
     .attr("width", 165)
-    .attr("height", 90);
+    .attr("height", 100);
 
   dropdown
     .append("rect")
     .attr("class", "scatter-dropdown-button")
     .attr("width", 165)
-    .attr("height", 90);
+    .attr("height", 100);
 
   dropdown
     .selectAll(".scatter-dropdown-option")
-    .data(["GDP per capita", "Vaccination rate", "Stringency Index"])
+    .data([
+      "GDP Per Capita",
+      "Vaccination Rate",
+      "Stringency Index",
+      "Population Density",
+    ])
     .enter()
     .append("text")
     .attr("class", "scatter-dropdown-option")
@@ -169,12 +181,13 @@ export function scatterPlot(monthly, containerId) {
 var x, y, scatterX, scatterY, scatterXLabel, scatterYLabel;
 
 function clusterAndRenderScatterPlot(optionId, clusterGroup, data) {
-  console.log("Scatter Plot:");
-  console.log(data);
+  // console.log("Scatter Plot:");
+  // console.log(data);
 
   d3.select("#scatter-option1").style("font-weight", "normal");
   d3.select("#scatter-option2").style("font-weight", "normal");
   d3.select("#scatter-option3").style("font-weight", "normal");
+  d3.select("#scatter-option4").style("font-weight", "normal");
   d3.select("#" + optionId).style("font-weight", "bold");
 
   var xAxisLabel;
@@ -185,13 +198,16 @@ function clusterAndRenderScatterPlot(optionId, clusterGroup, data) {
     } else if (optionId == "scatter-option2") {
       xAxisLabel = "Vaccination Rate";
       return [+d.vacc_rate, d.new_cases_per_million];
-    } else {
+    } else if (optionId == "scatter-option3") {
       xAxisLabel = "Stringency Index";
       return [+d.stringency_index, d.new_cases_per_million];
+    } else {
+      xAxisLabel = "Population Density";
+      return [+d.population_density, d.new_cases_per_million];
     }
   });
 
-  console.log(featureVectors);
+  // console.log(featureVectors);
 
   var scatterCircles = d3.selectAll(".scatter-c");
   if (scatterCircles) {
@@ -203,7 +219,7 @@ function clusterAndRenderScatterPlot(optionId, clusterGroup, data) {
   if (scatterYLabel) scatterYLabel.remove();
 
   const k = 4,
-    maxIterations = 300;
+    maxIterations = 10;
 
   var result = kMeans(k, maxIterations, featureVectors);
 
@@ -213,9 +229,6 @@ function clusterAndRenderScatterPlot(optionId, clusterGroup, data) {
     .scaleLinear()
     .domain([
       d3.min(featureVectors, function (d) {
-        // console.log("d0 and d1");
-        // console.log(d[0]);
-        // console.log(d[1]);
         return d[0];
       }),
       d3.max(featureVectors, function (d) {
@@ -235,6 +248,21 @@ function clusterAndRenderScatterPlot(optionId, clusterGroup, data) {
       }),
     ])
     .range([height, 0]);
+
+  // if (optionId == "scatter-option1" || optionId == "scatter-option4") {
+  //   // console.log("Changing Y AXIS");
+  //   y = d3
+  //     .scaleLinear()
+  //     .domain([
+  //       d3.min(featureVectors, function (d) {
+  //         return d[1];
+  //       }),
+  //       d3.max(featureVectors, function (d) {
+  //         return d[1];
+  //       }),
+  //     ])
+  //     .range([height, 0]);
+  // }
 
   var xAxis = d3.axisBottom(x);
   // .tickFormat(function (d) {
@@ -279,7 +307,7 @@ function clusterAndRenderScatterPlot(optionId, clusterGroup, data) {
     .append("circle")
     .attr("class", "scatter-c")
     .transition()
-    .duration(250)
+    // .duration(150)
     // .delay((d, i) => i)
     .attr("cx", function (d) {
       return x(d[0]);
@@ -332,7 +360,7 @@ export function kMeans2(k, maxIterations, monthly, containerId) {
   }
 
   // Assign countries to clusters
-  var maxIterations = 100;
+  var maxIterations = 10;
   var iterations = 0;
   var clusters;
   do {

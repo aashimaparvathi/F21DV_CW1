@@ -23,8 +23,12 @@ var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   wave3month = 5,
   dataForAMonth_g = {}; // global variable;
 
+export { wave1month };
+export { wave1year };
 export { wave2month };
 export { wave2year };
+export { wave3month };
+export { wave3year };
 
 const intervalDelay = 10; // change intervalDelay back to 1000 later
 // Create a mapping object to store iso_code -> country_name mapping
@@ -56,16 +60,18 @@ let locationImage = d3
 const group = d3
   .select("body")
   .append("div")
+  .attr("class", "group-container")
   .style("position", "relative")
+  .style("display", "inline-block")
   .style("width", svgWidth + 50 + "px")
-  .style("height", 20 + "px")
-  .style("display", "inline-block");
+  .style("height", 20 + "px");
 
 var svg = group
   .append("svg")
   .attr("class", "svg-c")
   .attr("width", svgWidth + margin.left + margin.right)
   .attr("height", svgHeight + margin.top + margin.bottom)
+  .attr("max-width", "100%")
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -87,7 +93,8 @@ var nextgroup = d3
 bubbleSvg = nextgroup
   .append("svg")
   .attr("width", bubbleWidth + bubbleMargin.left + bubbleMargin.right)
-  .attr("height", bubbleHeight + bubbleMargin.top + bubbleMargin.bottom);
+  .attr("height", bubbleHeight + bubbleMargin.top + bubbleMargin.bottom)
+  .attr("max-width", "100%");
 
 var lineGroup = d3
   .select("body")

@@ -46,7 +46,7 @@
 
 .image-sub-title {
   top: 10%;
-  left: 24%;
+  left: 23.5%;
   font-size: 2em;
   text-align: left;
   color: aliceblue;
@@ -286,7 +286,8 @@
   fill: #db3915;
 }
 
-.bubbletooltip-text {
+.bubbletooltip-text,
+.tooltip-text {
   color: #444444;
   font-family: serif, Arial, Helvetica, sans-serif;
   font-size: 15px;
@@ -388,4 +389,8 @@
   color: #444444;
   font-size: 12px;
   /* margin: 10px; */
+}
+
+.tooltip-text {
+  color: #444444;
 }

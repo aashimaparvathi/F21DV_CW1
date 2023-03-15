@@ -1,6 +1,7 @@
-const lineMargin = { top: 20, bottom: 40, left: 0, right: 30 },
+const lineMargin = { top: 20, bottom: 40, left: 0, right: 45 },
   lineWidth = 1000 - lineMargin.left - lineMargin.right,
-  lineHeight = 290 - lineMargin.top - lineMargin.bottom;
+  lineHeight = 290 - lineMargin.top - lineMargin.bottom,
+  format = d3.format(".2f");
 
 var dropdown,
   linexScale,
@@ -27,7 +28,7 @@ export function drawLineChart(containerId) {
     .append("g")
     .attr(
       "transform",
-      "translate(" + lineMargin.left + 50 + "," + lineMargin.top + ")"
+      "translate(" + lineMargin.left + 25 + "," + lineMargin.top + ")"
     );
 }
 
@@ -40,18 +41,6 @@ export function renderLineChart(dataMap, svgHeight) {
   //console.log(location_fromDataMap);
 
   dropdown = d3.select(".dropdown-c");
-
-  // Legend
-  // const lineLegend = container
-  //   .append("div")
-  //   .attr("class", "linelegend-c")
-  //   // .style("position", "relative")
-  //   // .style("top", "10px") // adjust the top position as needed
-  //   // .style("left", "15px") // adjust the left position as needed
-  //   .style("width", "100px")
-  //   .style("height", "120px");
-  // .style("padding", "10px");
-  //.attr("transform", `translate(${lineWidth - 100},${lineHeight - 100})`);
 
   const lineLegend = d3.select(".line-legend");
 
@@ -133,7 +122,7 @@ export function renderLineChart(dataMap, svgHeight) {
     .domain([new Date(2020, 1), new Date(2021, 2)])
     .range([0, lineWidth]);
 
-  lineyScale = d3.scaleLog().domain([0.0001, 100]).range([lineHeight, 0]);
+  lineyScale = d3.scaleLinear().domain([0, 200]).range([lineHeight, 0]);
 
   // Add death line to line chart
   deathLine = lineSvg.append("path").attr("class", "death-line");
@@ -150,7 +139,12 @@ export function renderLineChart(dataMap, svgHeight) {
     .attr("class", "x-axis")
     .attr("transform", "translate(0," + lineHeight + ")")
     .call(
-      xAxis.tickFormat(d3.timeFormat("%b, %y")).ticks(d3.timeMonth.every(1))
+      xAxis
+        .tickFormat(d3.timeFormat("%b, %y"))
+        .ticks(d3.timeMonth.every(1))
+        .tickValues(
+          d3.timeMonth.every(1).range(new Date(2020, 1), new Date(2021, 2))
+        )
     );
 
   lineSvg
@@ -233,6 +227,8 @@ export function updateLineChart() {
       console.log(d);
     }
     if (isNaN(+d.death_rate1) || isNaN(+d.vacc_rate)) {
+      d.death_rate1 = 0;
+      d.vacc_rate = 0;
       console.log("Something WRONG!!!!!");
       console.log(d);
     }
@@ -241,17 +237,23 @@ export function updateLineChart() {
   // Update the x scale domain
   linexScale.domain(
     d3.extent(countryData, function (d) {
-      return new Date(d.year, d.month - 1);
+      return new Date(+d.year, +d.month - 1);
     })
   );
 
-  // Update the y scale domain
-  lineyScale.domain([
-    0.0001,
-    d3.max(countryData, function (d) {
-      return d3.max([(d.death_rate1, d.vacc_rate)]);
-    }),
-  ]);
+  var deathRMax = d3.max(countryData, (d) => +d.death_rate1);
+  var vaccRMax = d3.max(countryData, (d) => +d.vacc_rate);
+
+  console.log(deathRMax + ", " + vaccRMax);
+
+  const max = d3.max(countryData, function (d) {
+    if (+d.death_rate1 >= +d.vacc_rate) return +d.death_rate1;
+    else return +d.vacc_rate;
+  });
+
+  console.log(max);
+
+  lineyScale = d3.scaleLinear().domain([0, max]).range([lineHeight, 0]);
 
   // Update the x axis
   lineSvg
@@ -270,21 +272,27 @@ export function updateLineChart() {
     .select(".y-axis")
     .transition()
     .duration(1000)
-    .call(d3.axisLeft(lineyScale).ticks(5).tickFormat(d3.format(".0%")));
+    .call(d3.axisLeft(lineyScale));
 
   const curvetype = d3.curveCatmullRom;
 
   // Define line functions for death and vaccination rates
   const deathLineFunction = d3
-    .line() //.area()
+    .line()
     .x(function (d) {
+      //console.log(d);
       var xdate = new Date(d.year, d.month - 1);
-      //console.log(xdate);
+      if (isNaN(xdate) || isNaN(linexScale(xdate))) {
+        console.log("SOMETHING WRONG!!");
+      }
+      console.log(xdate + ", " + linexScale(xdate));
       return linexScale(xdate);
     })
-    //.y0(lineHeight)
     .y(function (d) {
-      return lineyScale(d.death_rate1 === 0 ? 0.0001 : d.death_rate1);
+      // return lineyScale(d.death_rate1 === 0 ? 0.0001 : d.death_rate1);
+      console.log("death rate");
+      console.log(+d.death_rate1 + ", " + lineyScale(+d.death_rate1));
+      return lineyScale(+d.death_rate1);
     })
     .curve(curvetype);
 
@@ -295,7 +303,10 @@ export function updateLineChart() {
     })
     //.y0(lineHeight)
     .y(function (d) {
-      return lineyScale(d.vacc_rate === 0 ? 0.0001 : d.vacc_rate);
+      // return lineyScale(d.vacc_rate === 0 ? 0.0001 : d.vacc_rate);
+      console.log("vaccination rate");
+      console.log(d.vacc_rate + ", " + d.vacc_rate);
+      return lineyScale(+d.vacc_rate);
     })
     .curve(curvetype);
 
@@ -304,4 +315,135 @@ export function updateLineChart() {
 
   // Update vaccination line with data
   vaccinationLine.datum(countryData).attr("d", vaccinationLineFunction);
+  // Add a transparent rectangle over the SVG to capture mouse events
+
+  lineSvg
+    .append("rect")
+    .attr("class", "overlay")
+    .attr("width", lineWidth + lineMargin.left + lineMargin.right)
+    .attr("height", lineHeight + lineMargin.top + lineMargin.bottom)
+    // .attr("fill", "blue")
+    .style("opacity", 0)
+    .attr(
+      "transform",
+      "translate(",
+      lineMargin.left + "," + lineMargin.top + ")"
+    );
+
+  lineSvg
+    .on("mousemove", function (event, d) {
+      // Get the mouse position
+      const [mouseX, mouseY] = d3.pointer(event);
+
+      // Calculate the corresponding date on the x-axis
+      const xValue = linexScale.invert(mouseX);
+
+      // Find the index of the data point closest to the mouse position for each line
+      const bisect = d3.bisector((d) => new Date(d.year, d.month - 1)).left;
+      const deathIndex = bisect(countryData, xValue);
+      const vaccIndex = bisect(countryData, xValue);
+
+      // Get the data points for each line at the closest dates to the mouse position
+      const deathData = countryData[deathIndex];
+      const vaccData = countryData[vaccIndex];
+
+      console.log(deathData);
+      console.log(vaccData);
+      console.log(
+        vaccData.date +
+          ": death rate: " +
+          vaccData.death_rate1 +
+          ", vacc rate: " +
+          vaccData.vacc_rate +
+          ", new deaths PM: " +
+          vaccData.new_deaths_per_million +
+          ", new cases PM: " +
+          vaccData.new_cases_per_million
+      );
+
+      var deathYValue = format(vaccData.death_rate1);
+      var vaccinationYValue = format(vaccData.vacc_rate);
+      var deathPMYValue = format(vaccData.new_deaths_per_million);
+      var casesPMYValue = format(vaccData.new_cases_per_million);
+
+      // Add the vertical line
+      lineSvg
+        .selectAll(".vertical-line")
+        .data([xValue])
+        .join(
+          (enter) =>
+            enter
+              .append("line")
+              .attr("class", "vertical-line")
+              .attr("x1", mouseX)
+              .attr("x2", mouseX)
+              .attr("y1", 0)
+              .attr("y2", lineHeight)
+              .attr("stroke", "gainsboro"),
+          (update) =>
+            update.attr("x1", mouseX).attr("x2", mouseX).attr("y2", lineHeight),
+          (exit) => exit.remove()
+        );
+
+      //Add the tooltip
+      lineSvg
+        .selectAll(".line-tooltip")
+        .data([xValue])
+        .join(
+          (enter) =>
+            enter
+              .append("g")
+              .attr("class", "line-tooltip")
+              .attr("transform", `translate(${mouseX}, 0)`)
+              .call((g) =>
+                g
+                  .append("rect")
+                  .attr("class", "tooltip-background")
+                  .attr("width", 200)
+                  .attr("height", 100)
+                  .attr("x", 10)
+                  .attr(
+                    "y",
+                    (lineHeight - lineMargin.top - lineMargin.bottom) / 2
+                  )
+                  .attr("rx", 10)
+                  .attr("ry", 10)
+                  .style("fill", "#fff")
+                  .style("stroke", "gainsboro")
+              )
+              .call(
+                (g) =>
+                  g
+                    .append("text")
+                    .attr("class", "tooltip-text")
+                    .attr("x", 15)
+                    .attr(
+                      "y",
+                      (lineHeight - lineMargin.top - lineMargin.bottom) / 2 + 20
+                    )
+                    .html(function () {
+                      return `
+                        <tspan x="14" dy="1em">Deaths (PM): ${deathPMYValue}</tspan>
+                        <tspan x="14" dy="1em">Cases (PM): ${casesPMYValue}</tspan>
+                        <tspan x="14" dy="1em">Mortality Rate: ${deathYValue}%</tspan>
+                        <tspan x="14" dy="1em">Vaccination Rate: ${vaccinationYValue}%</tspan>
+                      `;
+                    })
+                    .style("color", "black")
+                    .transition()
+                    .delay(1000)
+                    .duration(500)
+                    .style("opacity", 1)
+                // .style("white-space", "pre-wrap")
+              ),
+          (update) => update.attr("transform", `translate(${mouseX}, 0)`),
+          (exit) => exit.transition().duration(500).style("opacity", 0).remove()
+        );
+    })
+    .on("mouseout", function () {
+      // Remove the vertical line and tooltip
+      lineSvg.selectAll(".vertical-line").remove();
+      lineSvg.selectAll(".line-tooltip").remove();
+      lineSvg.selectAll(".tooltip-text").remove();
+    });
 }

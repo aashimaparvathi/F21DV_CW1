@@ -5,9 +5,9 @@ import { updateLineChart } from "./linechart.js";
 var firstTime = 0;
 export { firstTime };
 
-const bubbleMargin = { top: 20, bottom: 50, left: 50, right: 30 },
-  bubbleWidth = 450 - bubbleMargin.left - bubbleMargin.right,
-  bubbleHeight = 500 - bubbleMargin.top - bubbleMargin.bottom;
+const bubbleMargin = { top: 20, bottom: 50, left: 50, right: 20 },
+  bubbleWidth = 500 - bubbleMargin.left - bubbleMargin.right,
+  bubbleHeight = 480 - bubbleMargin.top - bubbleMargin.bottom;
 
 const bubbletooltip = d3
   .select("body")
@@ -99,14 +99,21 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
     )
     .attr("id", "bubblechart");
 
+  var periodText = d3.select(".period-text");
+  var period = periodText.text();
+
+  if (d3.select(".bubble-title-c")) {
+    d3.select(".bubble-title-c").remove();
+  }
+
   bubbleSvg
     .append("text")
     .attr("x", bubbleWidth / 2 + bubbleMargin.left + 20)
-    .attr("y", bubbleMargin.top + 10 / 2)
+    .attr("y", bubbleMargin.top + 5 / 2)
     .attr("text-anchor", "middle")
     .attr("class", "bubble-title-c")
     .attr("id", "covid-response")
-    .text("Impact of Stringency & Population");
+    .text("Impact of Stringency & Population (" + period + ")");
 
   bubbleChart
     .selectAll("circle")

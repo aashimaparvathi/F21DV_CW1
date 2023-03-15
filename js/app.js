@@ -4,15 +4,14 @@ import { renderLineChart } from "./linechart.js";
 import { updateLineChart } from "./linechart.js";
 import { renderBubbleChart } from "./bubblechart.js";
 import { scatterPlot } from "./kmeans.js";
-import { kMeans2 } from "./kmeans.js";
 
 // Define the dimensions and margins of the plot
 var margin = { top: 80, right: 30, bottom: 30, left: 5 },
+  svgWidth = 900 - margin.left - margin.right,
+  svgHeight = 473 - margin.top - margin.bottom,
   bubbleMargin = { top: 20, bottom: 50, left: 50, right: 30 },
-  svgWidth = 800 - margin.left - margin.right,
-  svgHeight = 500 - margin.top - margin.bottom,
-  bubbleWidth = 450 - bubbleMargin.left - bubbleMargin.right,
-  bubbleHeight = 500 - bubbleMargin.top - bubbleMargin.bottom,
+  bubbleWidth = 500 - bubbleMargin.left - bubbleMargin.right,
+  bubbleHeight = 480 - bubbleMargin.top - bubbleMargin.bottom,
   bubbleChart,
   readyForBubble = 0,
   wave1year = 2020,
@@ -30,6 +29,21 @@ export { wave2year };
 export { wave3month };
 export { wave3year };
 
+/* Using for styling the scroll*/
+
+const showMapButton = document.getElementById("show-map-button");
+const mapBubbleLineContainer = document.querySelector(
+  ".map-bubble-line-container"
+);
+
+showMapButton.addEventListener("click", () => {
+  mapBubbleLineContainer.style.display = "block";
+  window.scrollTo({
+    top: mapBubbleLineContainer.offsetTop,
+    behavior: "smooth",
+  });
+});
+
 const intervalDelay = 10; // change intervalDelay back to 1000 later
 // Create a mapping object to store iso_code -> country_name mapping
 var isoToCountry = {};
@@ -42,7 +56,7 @@ export { bubbleSvg };
 var myIsoCodes = ["USA", "CHN", "AUS", "GUY", "CAF", "VUT", "GRL", "PHL"];
 
 const tooltip = d3
-  .select("body")
+  .select(".main-container")
   .append("div")
   .attr("class", "tooltip-c")
   .style("opacity", 0)
@@ -50,21 +64,20 @@ const tooltip = d3
 
 // create a div to hold the location or flag image
 let locationImage = d3
-  .select("body")
+  .select(".map-container")
   .append("div")
   .attr("class", "location-image")
   .style("position", "absolute")
   .style("pointer-events", "none")
   .style("opacity", 0);
 
-const group = d3
-  .select("body")
-  .append("div")
-  .attr("class", "group-container")
-  .style("position", "relative")
-  .style("display", "inline-block")
-  .style("width", svgWidth + 50 + "px")
-  .style("height", 20 + "px");
+const group = d3.select(".map-container");
+// .append("div")
+// .attr("class", "group-container")
+// .style("position", "relative")
+// .style("display", "inline-block")
+// .style("width", svgWidth + 50 + "px")
+// .style("height", 20 + "px");
 
 var svg = group
   .append("svg")
@@ -76,7 +89,7 @@ var svg = group
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 group
-  .append("g")
+  .append("div")
   .attr("id", "play-c")
   .attr("transform", "translate(0, " + (svgHeight - 60) + ")")
   .append("button")
@@ -84,37 +97,32 @@ group
   .attr("class", "play-c")
   .text("▶");
 
-var nextgroup = d3
-  .select("body")
-  .append("g")
-  .attr("class", "bubblegroup-c")
-  .attr("id", "bubblegroup");
-
-bubbleSvg = nextgroup
+bubbleSvg = d3
+  .select(".bubble-container")
   .append("svg")
   .attr("width", bubbleWidth + bubbleMargin.left + bubbleMargin.right)
   .attr("height", bubbleHeight + bubbleMargin.top + bubbleMargin.bottom)
   .attr("max-width", "100%");
 
 var lineGroup = d3
-  .select("body")
-  .append("g")
-  .attr("class", "linegroup-c")
+  .select(".line-chart-container")
+  // .append("div")
+  // .attr("class", "linegroup-c")
   .attr("id", "linegroup");
 
 var gdpGroup = d3
-  .select("body")
+  .select(".heatmap-container")
   .append("g")
   .attr("class", "gdpgroup-c")
   .attr("id", "gdpgroup");
 
 var clusterGroup = d3
-  .select("body")
+  .select(".scatter-container")
   .append("g")
   .attr("class", "clustergroup-c")
   .attr("id", "clustergroup");
 
-drawLineChart("linegroup");
+drawLineChart("line-chart-container");
 
 // Create projection to map the latitudes and longitudes to x and y
 const projection = d3
@@ -176,13 +184,10 @@ export function filterData(month, year, data) {
 Promise.all([
   // https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson
   d3.json("./data/map/world.geojson"),
-  d3.csv("./data/montly_per_continent.csv"),
   d3.csv("./data/monthly_all.csv"),
-]).then(function ([world, monthly_per_continent, monthly]) {
+]).then(function ([world, monthly]) {
   // console.log("world: ");
   // console.log(world);
-  // console.log("monthly_per_continent: ");
-  // console.log(monthly_per_continent);
   // console.log("monthly: ");
   // console.log(monthly);
 
@@ -269,6 +274,7 @@ Promise.all([
     .attr("width", 40)
     .attr("height", 20)
     .text(formatTime(new Date(yearToFilter, monthToFilter - 1)))
+    .attr("class", "period-text")
     .style("font-family", "serif");
 
   // Create a legend container
@@ -326,7 +332,56 @@ Promise.all([
     .attr("stroke", "#aaaaaa")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  renderBubbleChart(yearToFilter, monthToFilter, monthly, myIsoCodes);
+  const bubbleContainer = d3.select(".bubble-container");
+  const options = {
+    root: null,
+    rootMargin: "0px",
+    threshold: 1.0,
+  };
+
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        renderBubbleChart(yearToFilter, monthToFilter, monthly, myIsoCodes);
+        // select the element by its ID
+        //const myElement = d3.select(".svg-c").select("#AFG");
+        var myElement = d3.select(".play-c");
+
+        // append a tooltip to the element
+        var tooltip1 = myElement
+          .append("div")
+          .attr("class", "tooltip1-c")
+          .style("opacity", 0)
+          .style("position", "absolute")
+          .html(
+            "<br>Click here to see <br><br>the impact across <br><br>countries over time. "
+          )
+          .style("padding", "0 5px")
+          .style("background", "white")
+          .style("border-radius", "10px")
+          .style("z-index", "9999")
+          .style("border-color", "red")
+          .style("border-style", "solid")
+          .style("border-width", "1px")
+          .transition()
+          .duration(2000)
+          .style("opacity", 1)
+          .on("end", function () {
+            // make the tooltip disappear after 3 seconds
+            tooltip1
+              .transition()
+              .duration(1000)
+              .delay(2000)
+              .style("opacity", 0)
+              .remove();
+          });
+
+        observer.unobserve(entry.target);
+      }
+    });
+  }, options);
+
+  observer.observe(bubbleContainer.node());
 
   bubbleChart = d3.select("#bubblechart");
   var dataForAMonth = monthly.filter(

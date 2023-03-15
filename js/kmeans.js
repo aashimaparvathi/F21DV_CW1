@@ -108,16 +108,26 @@ function kMeans(k, maxIterations, featureVectors) {
 export function scatterPlot(monthly, containerId) {
   const gdpData = monthly.filter(
     (d) =>
-      (+d.year === wave1year && +d.month === wave1month) ||
-      (+d.year === wave2year && +d.month === wave2month) ||
-      (+d.year === wave3year && +d.month === wave3month)
+      (+d.year >= wave1year &&
+        +d.month >= wave1month &&
+        +d.year <= wave2year &&
+        +d.month <= wave2month) ||
+      (+d.year >= wave2year &&
+        +d.month >= wave2month &&
+        +d.year <= wave3year &&
+        +d.month <= wave3month)
+    // (+d.year === wave1year && +d.month === wave1month) ||
+    // (+d.year === wave2year && +d.month === wave2month) ||
+    // (+d.year === wave3year && +d.month === wave3month)
   );
+
+  containerId = "scatter-chart";
 
   const data = fixData(gdpData);
   // const data = fixData(monthly);
 
   const scattertooltip = d3
-    .select("#" + containerId)
+    .select("." + containerId)
     .append("div")
     .attr("class", "scattertooltip-c")
     .style("opacity", 0)
@@ -126,7 +136,7 @@ export function scatterPlot(monthly, containerId) {
   var clusterGroup = d3.select("#" + containerId);
 
   const legend = d3
-    .select(`#${containerId}`)
+    .select(".scatter-legend")
     .append("svg")
     .attr("class", "scatter-legend-c")
     .attr("width", 250)
@@ -164,7 +174,8 @@ export function scatterPlot(monthly, containerId) {
 
   // Chart creation
 
-  svg = clusterGroup
+  svg = d3
+    .select(".scatter-chart")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -296,7 +307,7 @@ function clusterAndRenderScatterPlot(optionId, clusterGroup, data) {
     // .attr("y", -margin.left)
     .attr(
       "transform",
-      "translate(" + (-margin.left + 40) + "," + height / 2 + ")rotate(-90)"
+      "translate(" + (-margin.left + 50) + "," + height / 2 + ")rotate(-90)"
     )
     .text("New cases per million");
 

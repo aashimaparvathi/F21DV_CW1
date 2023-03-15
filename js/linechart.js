@@ -1,5 +1,5 @@
 const lineMargin = { top: 20, bottom: 40, left: 0, right: 30 },
-  lineWidth = 1250 - lineMargin.left - lineMargin.right,
+  lineWidth = 1000 - lineMargin.left - lineMargin.right,
   lineHeight = 290 - lineMargin.top - lineMargin.bottom;
 
 var dropdown,
@@ -8,62 +8,52 @@ var dropdown,
   deathLine,
   vaccinationLine,
   lineSvg,
-  dataMap_g;
+  dataMap_g,
+  container,
+  lineGroup;
 
 //Define drawLine function
 export function drawLineChart(containerId) {
-  const lineGroup = d3.select("#" + containerId);
+  lineGroup = d3.select("." + containerId);
 
-  const container = lineGroup
-    .append("g")
-    .attr("class", "dropdown-container")
-    .attr(
-      "transform",
-      "translate(" + lineMargin.left + 230 + "," + lineMargin.top + ")"
-    );
+  container = d3.select(".line-legend-container");
 
   lineSvg = lineGroup
     .append("svg")
     .attr("class", "line-svg-c")
+
     .attr("width", lineWidth + lineMargin.left + lineMargin.right)
     .attr("height", lineHeight + lineMargin.top + lineMargin.bottom)
     .append("g")
     .attr(
       "transform",
-      "translate(" + lineMargin.left + 230 + "," + lineMargin.top + ")"
+      "translate(" + lineMargin.left + 50 + "," + lineMargin.top + ")"
     );
 }
 
 export function renderLineChart(dataMap, svgHeight) {
   dataMap_g = dataMap;
-  const container = d3.select(".dropdown-container");
+  const container = d3.select(".line-legend-container");
 
   // Create an array of country names for the dropdown menu
   var location_fromDataMap = Array.from(dataMap.keys());
   //console.log(location_fromDataMap);
 
-  dropdown = container
-    .append("select")
-    .attr("class", "dropdown-c")
-    .attr("id", "dropdownmenu")
-    .style("position", "relative")
-    .style("top", "50px") // adjust the top position as needed
-    .style("left", "15px") // adjust the left position as needed
-    .style("width", "160px")
-    .style("height", "120px")
-    .style("padding", "20px");
+  dropdown = d3.select(".dropdown-c");
 
   // Legend
-  const lineLegend = container
-    .append("g")
-    .attr("class", "linelegend-c")
-    .style("position", "absolute")
-    .style("top", svgHeight + lineHeight / 2 + 100 + "px") // adjust the top position as needed
-    .style("left", "15px") // adjust the left position as needed
-    .style("width", "220px")
-    .style("height", "120px")
-    .style("padding", "10px");
+  // const lineLegend = container
+  //   .append("div")
+  //   .attr("class", "linelegend-c")
+  //   // .style("position", "relative")
+  //   // .style("top", "10px") // adjust the top position as needed
+  //   // .style("left", "15px") // adjust the left position as needed
+  //   .style("width", "100px")
+  //   .style("height", "120px");
+  // .style("padding", "10px");
   //.attr("transform", `translate(${lineWidth - 100},${lineHeight - 100})`);
+
+  const lineLegend = d3.select(".line-legend");
 
   const lineColor = {
     death_rate: "#ad001ac7",
@@ -141,7 +131,7 @@ export function renderLineChart(dataMap, svgHeight) {
   linexScale = d3
     .scaleTime()
     .domain([new Date(2020, 1), new Date(2021, 2)])
-    .range([0, lineWidth - 230]);
+    .range([0, lineWidth]);
 
   lineyScale = d3.scaleLog().domain([0.0001, 100]).range([lineHeight, 0]);
 

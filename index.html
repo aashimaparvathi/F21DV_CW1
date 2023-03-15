@@ -3,15 +3,52 @@
   <head>
     <meta charset="utf-8" />
     <title>D3 World Map</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" target="_blank" href="css/map.css" />
     <style></style>
   </head>
   <body>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <div class="world-border"></div>
-    <div class="bubble-border"></div>
-    <div class="line-border"></div>
+    <div class="main-container" id="main-container">
+      <div class="image-container">
+        <div class="image-wrapper">
+          <img
+            src="./images/start.jpeg"
+            style="max-width: 100%; height: auto"
+            alt="Begin Here"
+          />
+          <h1 class="image-title">COVID 19</h1>
+          <h2 class="image-sub-title">
+            A Proportionate or Disproportionate Impact on the World?
+          </h2>
+        </div>
+        <div id="begin-div">
+          <h2 class="image-sub-title" id="button-title">Begin</h2>
+          <button id="show-map-button" class="show-map-button"></button>
+        </div>
+      </div>
+      <div class="map-bubble-line-container">
+        <div class="map-bubble-container">
+          <div class="map-container" id="map-container"></div>
+          <div class="bubble-container" id="bubble-container"></div>
+        </div>
+        <div class="line-container" id="line-container">
+          <div class="line-legend-container">
+            <select id="dropdownmenu" class="dropdown-c"></select>
+            <div class="line-legend"></div>
+          </div>
+          <div class="line-chart-container"></div>
+        </div>
+      </div>
+      <div class="heatmap-container" id="heatmap-container">
+        <div class="heatmap-legend"></div>
+        <div class="heatmap-chart"></div>
+      </div>
+      <div class="scatter-container" id="scatter-container">
+        <div class="scatter-legend"></div>
+        <div class="scatter-chart"></div>
+      </div>
+    </div>
+
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="http://d3js.org/topojson.v3.min.js"></script>
     <script type="module" src="./js/heatmap.js" defer></script>

@@ -22,6 +22,7 @@ var x,
 
 // Define heatmap function
 export function drawHeatmap(containerId) {
+  containerId = "heatmap-container";
   console.log("heatmap.js");
 
   // console.log("Input gdpData");
@@ -35,7 +36,7 @@ export function drawHeatmap(containerId) {
     .style("position", "absolute");
 
   image_tooltip = d3
-    .select(`#${containerId}`)
+    .select("#" + containerId)
     .append("img")
     .attr("class", "heatmap-image-tooltip")
     .attr("src", "./images/icon.png")
@@ -114,7 +115,7 @@ export function drawHeatmap(containerId) {
 
   // Chart creation
   const svglegend = d3
-    .select(`#${containerId}`)
+    .select(".heatmap-legend")
     .append("svg")
     .attr("class", "gdp-legend-c")
     .attr("width", 250)
@@ -153,7 +154,7 @@ export function drawHeatmap(containerId) {
   createLegend_totalDeaths("gdp-legend-c", gdpData_fixed1);
 
   const svg = d3
-    .select(`#${containerId}`)
+    .select(".heatmap-chart")
     .append("svg")
     .attr("width", gdpWidth + gdpMargin.left + gdpMargin.right)
     .attr("height", gdpHeight + gdpMargin.top + gdpMargin.bottom)

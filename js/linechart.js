@@ -89,7 +89,7 @@ export function renderLineChart(dataMap, svgHeight) {
     .attr("class", "line-leglabel-death-rate")
     .attr("x", 15)
     .attr("y", 12)
-    .text("Death Rate")
+    .text("Mortality Rate")
     .style("font-size", "15px")
     .attr("alignment-baseline", "middle");
 
@@ -184,8 +184,8 @@ export function updateLineChart() {
   console.log("In updateLineChart function:");
   var country = dropdown.property("value");
   var countryData = dataMap_g.get(country);
-  console.log(country);
-  console.log(countryData);
+  // console.log(country);
+  // console.log(countryData);
 
   countryData.forEach(function (d) {
     d.year = +d.year;
@@ -223,14 +223,14 @@ export function updateLineChart() {
         ? 0
         : (d.new_deaths_per_million / d.new_cases_per_million) * 100;
     if (isNaN(+d.death_rate) || isNaN(+d.vacc_rate)) {
-      console.log("Something WRONG!!!!!");
-      console.log(d);
+      // console.log("Something WRONG!!!!!");
+      // console.log(d);
     }
     if (isNaN(+d.death_rate1) || isNaN(+d.vacc_rate)) {
       d.death_rate1 = 0;
       d.vacc_rate = 0;
-      console.log("Something WRONG!!!!!");
-      console.log(d);
+      // console.log("Something WRONG!!!!!");
+      // console.log(d);
     }
   });
 
@@ -244,14 +244,14 @@ export function updateLineChart() {
   var deathRMax = d3.max(countryData, (d) => +d.death_rate1);
   var vaccRMax = d3.max(countryData, (d) => +d.vacc_rate);
 
-  console.log(deathRMax + ", " + vaccRMax);
+  // console.log(deathRMax + ", " + vaccRMax);
 
   const max = d3.max(countryData, function (d) {
     if (+d.death_rate1 >= +d.vacc_rate) return +d.death_rate1;
     else return +d.vacc_rate;
   });
 
-  console.log(max);
+  // console.log(max);
 
   lineyScale = d3.scaleLinear().domain([0, max]).range([lineHeight, 0]);
 
@@ -283,15 +283,14 @@ export function updateLineChart() {
       //console.log(d);
       var xdate = new Date(d.year, d.month - 1);
       if (isNaN(xdate) || isNaN(linexScale(xdate))) {
-        console.log("SOMETHING WRONG!!");
+        // console.log("SOMETHING WRONG!!");
       }
-      console.log(xdate + ", " + linexScale(xdate));
+      // console.log(xdate + ", " + linexScale(xdate));
       return linexScale(xdate);
     })
     .y(function (d) {
-      // return lineyScale(d.death_rate1 === 0 ? 0.0001 : d.death_rate1);
-      console.log("death rate");
-      console.log(+d.death_rate1 + ", " + lineyScale(+d.death_rate1));
+      // console.log("death rate");
+      // console.log(+d.death_rate1 + ", " + lineyScale(+d.death_rate1));
       return lineyScale(+d.death_rate1);
     })
     .curve(curvetype);
@@ -303,9 +302,8 @@ export function updateLineChart() {
     })
     //.y0(lineHeight)
     .y(function (d) {
-      // return lineyScale(d.vacc_rate === 0 ? 0.0001 : d.vacc_rate);
-      console.log("vaccination rate");
-      console.log(d.vacc_rate + ", " + d.vacc_rate);
+      // console.log("vaccination rate");
+      // console.log(d.vacc_rate + ", " + d.vacc_rate);
       return lineyScale(+d.vacc_rate);
     })
     .curve(curvetype);
@@ -347,19 +345,19 @@ export function updateLineChart() {
       const deathData = countryData[deathIndex];
       const vaccData = countryData[vaccIndex];
 
-      console.log(deathData);
-      console.log(vaccData);
-      console.log(
-        vaccData.date +
-          ": death rate: " +
-          vaccData.death_rate1 +
-          ", vacc rate: " +
-          vaccData.vacc_rate +
-          ", new deaths PM: " +
-          vaccData.new_deaths_per_million +
-          ", new cases PM: " +
-          vaccData.new_cases_per_million
-      );
+      // console.log(deathData);
+      // console.log(vaccData);
+      // console.log(
+      //   vaccData.date +
+      //     ": death rate: " +
+      //     vaccData.death_rate1 +
+      //     ", vacc rate: " +
+      //     vaccData.vacc_rate +
+      //     ", new deaths PM: " +
+      //     vaccData.new_deaths_per_million +
+      //     ", new cases PM: " +
+      //     vaccData.new_cases_per_million
+      // );
 
       var deathYValue = format(vaccData.death_rate1);
       var vaccinationYValue = format(vaccData.vacc_rate);
@@ -379,7 +377,8 @@ export function updateLineChart() {
               .attr("x2", mouseX)
               .attr("y1", 0)
               .attr("y2", lineHeight)
-              .attr("stroke", "gainsboro"),
+              .attr("stroke", "gainsboro")
+              .attr("stroke-dasharray", "5 3"),
           (update) =>
             update.attr("x1", mouseX).attr("x2", mouseX).attr("y2", lineHeight),
           (exit) => exit.remove()
@@ -404,7 +403,7 @@ export function updateLineChart() {
                   .attr("x", 10)
                   .attr(
                     "y",
-                    (lineHeight - lineMargin.top - lineMargin.bottom) / 2
+                    (lineHeight - lineMargin.top - lineMargin.bottom) / 3
                   )
                   .attr("rx", 10)
                   .attr("ry", 10)
@@ -419,17 +418,17 @@ export function updateLineChart() {
                     .attr("x", 15)
                     .attr(
                       "y",
-                      (lineHeight - lineMargin.top - lineMargin.bottom) / 2 + 20
+                      (lineHeight - lineMargin.top - lineMargin.bottom) / 3 + 20
                     )
                     .html(function () {
                       return `
-                        <tspan x="14" dy="1em">Deaths (PM): ${deathPMYValue}</tspan>
-                        <tspan x="14" dy="1em">Cases (PM): ${casesPMYValue}</tspan>
+                        <tspan x="14" dy="1em">New Deaths (PM): ${deathPMYValue}</tspan>
+                        <tspan x="14" dy="1em">New Cases (PM): ${casesPMYValue}</tspan>
                         <tspan x="14" dy="1em">Mortality Rate: ${deathYValue}%</tspan>
                         <tspan x="14" dy="1em">Vaccination Rate: ${vaccinationYValue}%</tspan>
                       `;
                     })
-                    .style("color", "black")
+                    .style("fill", "#777777")
                     .transition()
                     .delay(1000)
                     .duration(500)

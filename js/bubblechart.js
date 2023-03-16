@@ -77,9 +77,20 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
     .domain([0, d3.max(myDataForAMonth_b, (d) => d.population_density)])
     .range([20, 60]);
 
-  /* For reference: ["USA", "CHN", "AUS", "GUY", "CAF"]; */
+  /* For reference: var myIsoCodes = ["USA", "CHN", "AUS", "GUY", "CAF", "VUT", "GRL", "PHL"]; */
   bubbleColor = d3.scaleOrdinal().domain(myIsoCodes).range(d3.schemeCategory10);
   //      .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#42ecff", "#9467bd"]);
+
+  var bubbleText = [
+    { code: "USA", text: "Highest Total Cases" },
+    { code: "CHN", text: "The Rumoured Protagonist" },
+    { code: "AUS", text: "Isolated Continent" },
+    { code: "GUY", text: "South-American Country" },
+    { code: "CAF", text: "African Country" },
+    { code: "VUT", text: "Remote Island Country" },
+    { code: "GRL", text: "Isolated North-American Country" },
+    { code: "PHL", text: "Archipelagic Asian Country" },
+  ];
 
   function countryColor(iso_code) {
     return iso_code === "USA" ||
@@ -166,12 +177,21 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
     .on("mouseover", function (event, d) {
       (bubbleID = d3.select(this).attr("id")), (bubbleIsoCode = d.iso_code);
       //console.log(bubbleID + ", " + bubbleIsoCode);
+
+      // get the matching object from bubbleText array
+      const matchingObj = bubbleText.find((d) => d.code === bubbleIsoCode);
+
+      // check if matching object is found and get the corresponding text
+      const matchingText = matchingObj ? matchingObj.text : "";
+
       d3.select(this).style("opacity", 0.7);
       bubbletooltip
         .html(
           "<div class=bubbletooltip-text>" +
             "<strong>" +
             d.location +
+            ": " +
+            matchingText +
             "</strong>" +
             "<br> New Cases: " +
             (typeof d.new_cases == "undefined" ? 0 : d.new_cases.toFixed(0)) +
@@ -208,7 +228,12 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
     })
     .on("mouseout", function (event, d) {
       d3.select(this).style("opacity", 1);
-      bubbletooltip.transition().duration(0).style("opacity", 0);
+      bubbletooltip
+        .transition()
+        .duration(0)
+        .style("opacity", 0)
+        .style("x", "0px")
+        .style("y", "0px");
 
       d3.select("#" + bubbleIsoCode)
         .classed("country-highlight", false)

@@ -13,7 +13,6 @@ var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   bubbleWidth = 500 - bubbleMargin.left - bubbleMargin.right,
   bubbleHeight = 480 - bubbleMargin.top - bubbleMargin.bottom,
   bubbleChart,
-  readyForBubble = 0,
   wave1year = 2020,
   wave1month = 3,
   wave2year = 2021,
@@ -29,22 +28,21 @@ export { wave2year };
 export { wave3month };
 export { wave3year };
 
-/* Using for styling the scroll*/
+// Select all the <p> elements within the .bullet-points div
+const bulletPoints = d3.select(".bullet-points").selectAll("p");
 
-const showMapButton = document.getElementById("show-map-button");
-const mapBubbleLineContainer = document.querySelector(
-  ".map-bubble-line-container"
-);
+// Set the initial styles for the text
+bulletPoints.style("opacity", "0").style("transform", "translateX(-100px)");
 
-showMapButton.addEventListener("click", () => {
-  mapBubbleLineContainer.style.display = "block";
-  window.scrollTo({
-    top: mapBubbleLineContainer.offsetTop,
-    behavior: "smooth",
-  });
-});
+// Animate the text to fade in and move in from the left
+bulletPoints
+  .transition()
+  .duration(1000)
+  .delay((d, i) => i * 500)
+  .style("opacity", "1")
+  .style("transform", "translateX(0)");
 
-const intervalDelay = 10; // change intervalDelay back to 1000 later
+const intervalDelay = 100; // change intervalDelay back to 1000 later
 // Create a mapping object to store iso_code -> country_name mapping
 var isoToCountry = {};
 var gdpData = {};
@@ -72,12 +70,6 @@ let locationImage = d3
   .style("opacity", 0);
 
 const group = d3.select(".map-container");
-// .append("div")
-// .attr("class", "group-container")
-// .style("position", "relative")
-// .style("display", "inline-block")
-// .style("width", svgWidth + 50 + "px")
-// .style("height", 20 + "px");
 
 var svg = group
   .append("svg")
@@ -343,8 +335,6 @@ Promise.all([
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         renderBubbleChart(yearToFilter, monthToFilter, monthly, myIsoCodes);
-        // select the element by its ID
-        //const myElement = d3.select(".svg-c").select("#AFG");
         var myElement = d3.select(".play-c");
 
         // append a tooltip to the element
@@ -354,7 +344,7 @@ Promise.all([
           .style("opacity", 0)
           .style("position", "absolute")
           .html(
-            "<br>Click here to see <br><br>the impact across <br><br>countries over time. "
+            "<br><strong>Play, Pause, Brush!</strong><br><br>to see the impact across <br><br>countries and continents <br><br>over time. <br><br>"
           )
           .style("padding", "0 5px")
           .style("background", "white")
@@ -371,7 +361,7 @@ Promise.all([
             tooltip1
               .transition()
               .duration(1000)
-              .delay(2000)
+              .delay(3000)
               .style("opacity", 0)
               .remove();
           });
@@ -514,7 +504,6 @@ Promise.all([
       button.text("▶");
       intervalId = 0;
       count = 0;
-      readyForBubble = 1;
       if (bubbleChart) {
         bubbleChart.remove();
       }

@@ -1,0 +1,248 @@
+.line-button-container {
+  padding: 20%;
+}
+
+#show-conclusions-button {
+  position: relative;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#show-conclusions-button {
+  display: inline-block;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #fb6a4a;
+  color: #fff;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+}
+
+#show-conclusions-button::after {
+  content: "";
+  display: inline-block;
+  margin-left: 5px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid #fff;
+}
+
+#show-cluster-button {
+  position: relative;
+  top: 1%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#show-cluster-button {
+  display: inline-block;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #fb6a4a;
+  color: #fff;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+}
+
+#show-cluster-button::after {
+  content: "";
+  display: inline-block;
+  margin-left: 5px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid #fff;
+}
+
+#show-summary-button {
+  position: relative;
+  top: 0%;
+  left: 20%;
+  transform: translate(-50%, -50%);
+}
+
+#show-summary-button {
+  display: inline-block;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #fb6a4a;
+  color: #fff;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+}
+
+#show-summary-button::after {
+  content: "";
+  display: inline-block;
+  margin-left: 5px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid #fff;
+}
+
+.first-summary-container,
+.second-summary-container {
+  width: 100%;
+  height: 100%;
+}
+
+.second-summary-container {
+  padding-bottom: 5%;
+}
+
+.first-summary-container h1 {
+  padding-top: 5%;
+  text-align: center;
+  color: rgb(252, 119, 30);
+}
+
+.second-summary-container h1 {
+  padding-top: 3%;
+  text-align: center;
+  color: rgb(252, 119, 30);
+}
+
+.second-summary-container .note {
+  padding-top: 1%;
+  text-align: center;
+  font-size: 1.3em;
+  color: rgb(252, 119, 30);
+}
+
+.first-summary-container h2 {
+  text-align: center;
+  color: rgb(252, 119, 30);
+}
+
+.first-summary-container h3 {
+  text-align: center;
+  color: black;
+}
+
+.first-summary-container p {
+  padding-top: 1%;
+  text-align: center;
+  font-size: 1.3em;
+  padding-bottom: 5%;
+  color: rgb(252, 119, 30);
+}
+
+.summary-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.summary-half {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+}
+
+.summary-item {
+  width: calc(33.33% - 10px);
+  margin-bottom: 20px;
+}
+
+.summary-item {
+  width: 18%;
+  height: 100px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.summary-item-title {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.summary-item-value {
+  font-size: 14px;
+  color: #777;
+}
+
+#show-next-button {
+  position: relative;
+  top: 5%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#show-next-button {
+  display: inline-block;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #fb6a4a;
+  color: #fff;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+}
+
+#show-next-button::after {
+  content: "";
+  display: inline-block;
+  margin-left: 5px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid #fff;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 5%;
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+.box {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+  margin-left: 1px;
+  margin-right: 1px;
+  height: 100px;
+}
+
+.parameters {
+  flex: 1;
+  text-align: center;
+  text-indent: 0%;
+}
+
+.observations {
+  flex: 1;
+}

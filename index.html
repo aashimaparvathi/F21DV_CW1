@@ -5,6 +5,12 @@
     <title>D3 World Map</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" target="_blank" href="css/map.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      target="_blank"
+      href="css/summary.css"
+    />
     <style></style>
   </head>
   <body>
@@ -12,14 +18,35 @@
       <div class="image-container">
         <div class="image-wrapper">
           <img
-            src="./images/start.jpeg"
+            src="./images/covidproportion.jpeg"
             style="max-width: 100%; height: auto"
             alt="Begin Here"
           />
-          <h1 class="image-title">COVID 19</h1>
-          <h2 class="image-sub-title">
-            A Proportionate or Disproportionate Impact on the World?
-          </h2>
+          <div class="main-content">
+            <h1 class="image-title">COVID 19</h1>
+            <h1 class="image-sub-title">
+              A Proportionate or Disproportionate Impact on the World?
+            </h1>
+            <div class="bullet-points">
+              <p>
+                Let's see how it spread
+                <strong>across countries and continents</strong>
+              </p>
+              <p>
+                <strong>Pause and view </strong>the impact of stringency
+                measures and population densities
+              </p>
+              <p>
+                <strong>Brush over the map </strong>to choose countries of
+                interest
+              </p>
+              <p>
+                <strong>Click the country bubbles </strong>to compare their
+                mortality and vaccination rates or
+                <strong>choose from the drop down</strong>
+              </p>
+            </div>
+          </div>
         </div>
         <div id="begin-div">
           <h2 class="image-sub-title" id="button-title">Begin</h2>
@@ -35,17 +62,171 @@
           <div class="line-legend-container">
             <select id="dropdownmenu" class="dropdown-c"></select>
             <div class="line-legend"></div>
+            <div class="line-button-container">
+              <button
+                id="show-summary-button"
+                class="show-summary-button"
+              ></button>
+            </div>
           </div>
           <div class="line-chart-container"></div>
         </div>
       </div>
+      <div class="first-summary-container">
+        <h1>Summary of Continents as of March 2023</h1>
+
+        <div class="summary-container">
+          <div class="summary-half">
+            <div class="summary-item" id="summary-item1">
+              <div class="summary-item-title">Africa</div>
+              <div class="summary-item-value">
+                Total Cases Per Million: 9149.469
+              </div>
+              <div class="summary-item-value">
+                Total Deaths Per Million: 181.357
+              </div>
+            </div>
+            <div class="summary-item" id="summary-item2">
+              <div class="summary-item-title">Asia</div>
+              <div class="summary-item-value">
+                Total Cases Per Million: 62449.158
+              </div>
+              <div class="summary-item-value">
+                Total Deaths Per Million: 344.105
+              </div>
+            </div>
+            <div class="summary-item" id="summary-item3">
+              <div class="summary-item-title">Europe</div>
+              <div class="summary-item-value">
+                Total Cases Per Million: 331320.276
+              </div>
+              <div class="summary-item-value">
+                Total Deaths Per Million: 2716.561
+              </div>
+            </div>
+          </div>
+          <div class="summary-half">
+            <div class="summary-item" id="summary-item4">
+              <div class="summary-item-title">North America</div>
+              <div class="summary-item-value">
+                Total Cases Per Million: 204405.986
+              </div>
+              <div class="summary-item-value">
+                Total Deaths Per Million: 2637.602
+              </div>
+            </div>
+            <div class="summary-item" id="summary-item5">
+              <div class="summary-item-title">South America</div>
+              <div class="summary-item-value">
+                Total Cases Per Million: 155623.694
+              </div>
+              <div class="summary-item-value">
+                Total Deaths Per Million: 3092.739
+              </div>
+            </div>
+            <div class="summary-item" id="summary-item6">
+              <div class="summary-item-title">Australia</div>
+              <div class="summary-item-value">
+                Total Cases Per Million: 311808.492
+              </div>
+              <div class="summary-item-value">
+                Total Deaths Per Million: 562.27
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2>
+          Now let's see whether other parameters gave countries an upper hand
+          during the pandemic.
+        </h2>
+        <div class="next-div">
+          <h3>
+            Did countries with higher GDP have an upper hand in saving their
+            people?
+          </h3>
+          <h3>Did vaccination help bring things under control?</h3>
+          <h3>Did the stringency measures truly help?</h3>
+          <h3>Did population density hasten the spread?</h3>
+          <p>
+            Choose the <strong>parameters in the seletion boxes </strong>to find
+            out more
+          </p>
+          <button id="show-next-button" class="show-next-button"></button>
+        </div>
+      </div>
       <div class="heatmap-container" id="heatmap-container">
+        <h1>Heatmap of the data during wave 2 of COVID-19 (March 2021)</h1>
         <div class="heatmap-legend"></div>
         <div class="heatmap-chart"></div>
+        <div class="heatmap-button-container">
+          <button id="show-cluster-button" class="show-cluster-button"></button>
+        </div>
       </div>
       <div class="scatter-container" id="scatter-container">
+        <h1>
+          Countries grouped on new cases per million and the chosen parameter
+        </h1>
+
         <div class="scatter-legend"></div>
+
         <div class="scatter-chart"></div>
+        <div class="scatter-button-container">
+          <button
+            id="show-conclusions-button"
+            class="show-conclusions-button"
+          ></button>
+        </div>
+      </div>
+      <div class="second-summary-container">
+        <h1>Conclusions - Strictly from a coursework perspective</h1>
+        <p class="note">No intension to bias!</p>
+        <div class="conclusions-container">
+          <div class="container">
+            <div class="parameters">
+              <div class="box">
+                <h3>GDP Per Capita</h3>
+              </div>
+              <div class="box">
+                <h3>Vaccination Rate</h3>
+              </div>
+              <div class="box">
+                <h3>Stringency Index</h3>
+              </div>
+              <div class="box">
+                <h3>Population Density</h3>
+              </div>
+            </div>
+            <div class="observations">
+              <div class="box">
+                <h3>Observation</h3>
+                <p>
+                  It appears that countries with higher GDP have lower number of
+                  new cases per million.
+                </p>
+              </div>
+              <div class="box">
+                <h3>Observation</h3>
+                <p>
+                  There appears to be a somewhat linear reduce in number of new
+                  cases per million with increasing rate of vaccination.
+                </p>
+              </div>
+              <div class="box">
+                <h3>Observation</h3>
+                <p>
+                  While we may expect an inversely propertional relationship
+                  between cases and stringency index, the grouping does not
+                  indicate that.
+                </p>
+              </div>
+              <div class="box">
+                <h3>Observation</h3>
+                <p>No pattern observed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -55,5 +236,6 @@
     <script type="module" src="./js/app.js" defer></script>
     <script type="module" src="./js/linechart.js" defer></script>
     <script type="module" src="./js/bubblechart.js" defer></script>
+    <script type="module" src="./js/extra.js" defer></script>
   </body>
 </html>

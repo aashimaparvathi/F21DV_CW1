@@ -435,8 +435,16 @@ function renderHeatMap(what, containerId, gdpData_fixed1) {
     }
   });
 
-  d3.select("#deaths-rectQAT").attr("stroke", "green");
-  d3.select("#cases-rectQAT").attr("stroke", "green");
+  d3.select("#deaths-rectQAT")
+    .attr("stroke", "green")
+    .attr("stroke-width", "3px");
+  d3.select("#cases-rectQAT")
+    .attr("stroke", "green")
+    .attr("stroke-width", "3px");
+  d3.select("#deaths-rectCOM")
+    .attr("stroke", "red")
+    .attr("stroke-width", "3px");
+  d3.select("#cases-rectCOM").attr("stroke", "red").attr("stroke-width", "3px");
 }
 
 export function fixData(data) {
@@ -616,7 +624,7 @@ function toggleTooltip(event, d, on_off) {
       .style("border-radius", "10px")
       .transition()
       .duration(100)
-      .style("opacity", 0.7);
+      .style("opacity", 1);
   } else {
     gdptooltip.style("opacity", 0);
   }

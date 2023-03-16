@@ -116,9 +116,6 @@ export function scatterPlot(monthly, containerId) {
         +d.month >= wave2month &&
         +d.year <= wave3year &&
         +d.month <= wave3month)
-    // (+d.year === wave1year && +d.month === wave1month) ||
-    // (+d.year === wave2year && +d.month === wave2month) ||
-    // (+d.year === wave3year && +d.month === wave3month)
   );
 
   containerId = "scatter-chart";
@@ -230,7 +227,7 @@ function clusterAndRenderScatterPlot(optionId, clusterGroup, data) {
   if (scatterYLabel) scatterYLabel.remove();
 
   const k = 4,
-    maxIterations = 10;
+    maxIterations = 300;
 
   var result = kMeans(k, maxIterations, featureVectors);
 

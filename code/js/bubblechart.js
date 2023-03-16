@@ -85,11 +85,12 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
     { code: "USA", text: "Highest Total Cases" },
     { code: "CHN", text: "The Rumoured Protagonist" },
     { code: "AUS", text: "Isolated Continent" },
-    { code: "GUY", text: "South-American Country" },
+    { code: "GUY", text: "South American Country" },
     { code: "CAF", text: "African Country" },
     { code: "VUT", text: "Remote Island Country" },
-    { code: "GRL", text: "Isolated North-American Country" },
+    { code: "GRL", text: "Isolated North American Country" },
     { code: "PHL", text: "Archipelagic Asian Country" },
+    { code: "FRA", text: "European Country" },
   ];
 
   function countryColor(iso_code) {

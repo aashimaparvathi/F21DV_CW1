@@ -42,7 +42,7 @@ bulletPoints
   .style("opacity", "1")
   .style("transform", "translateX(0)");
 
-const intervalDelay = 100; // change intervalDelay back to 1000 later
+const intervalDelay = 1000;
 // Create a mapping object to store iso_code -> country_name mapping
 var isoToCountry = {};
 var gdpData = {};
@@ -51,7 +51,17 @@ export { gdpData };
 var bubbleSvg;
 export { bubbleSvg };
 
-var myIsoCodes = ["USA", "CHN", "AUS", "GUY", "CAF", "VUT", "GRL", "PHL"];
+var myIsoCodes = [
+  "USA",
+  "CHN",
+  "AUS",
+  "GUY",
+  "CAF",
+  "VUT",
+  "GRL",
+  "PHL",
+  "FRA",
+];
 
 const tooltip = d3
   .select(".main-container")
@@ -174,15 +184,9 @@ export function filterData(month, year, data) {
 // ---------------------------------------------------------------------------------------------------
 
 Promise.all([
-  // https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson
   d3.json("./data/map/world.geojson"),
   d3.csv("./data/monthly_all.csv"),
 ]).then(function ([world, monthly]) {
-  // console.log("world: ");
-  // console.log(world);
-  // console.log("monthly: ");
-  // console.log(monthly);
-
   scatterPlot(monthly, "clustergroup");
   //kMeans2(5, 100, monthly, "clustergroup");
 
@@ -238,7 +242,6 @@ Promise.all([
   const colorScale = d3
     .scaleThreshold()
     .range(["#fee5d9", "#fcbba1", "#fc9272", "#fb6a4a", "#de2d26"])
-    //.range(["#e5b2b1", "#f26c6c", "#c94d4d", "#b43d3d", "#a93434"])
     .domain([
       d3.max(monthly, (d) => d.new_cases) / 10000,
       d3.max(monthly, function (d) {
@@ -268,6 +271,11 @@ Promise.all([
     .text(formatTime(new Date(yearToFilter, monthToFilter - 1)))
     .attr("class", "period-text")
     .style("font-family", "serif");
+
+  period
+    .append("text")
+    .html("New cases as of<br><br>")
+    .attr("class", "map-text");
 
   // Create a legend container
   const legend = d3

@@ -183,7 +183,6 @@
 }
 
 .map-container {
-  /* background-color: red; */
   width: 57%;
   /* padding: 0.5%; */
   padding-bottom: 0.5%;
@@ -281,7 +280,7 @@
   text-align: center;
   line-height: 10px;
   color: #fff;
-  background-color: #999999;
+  background-color: #444444;
   border: 2px solid #db3915;
   border-radius: 5px;
   border-width: 1px;
@@ -302,13 +301,14 @@
 
 .legend-item-text,
 .line-leglabel-death-rate,
-.line-leglabel-vacc-rate {
+.line-leglabel-vacc-rate,
+.map-text {
   font-size: 15px;
   font-family: serif, Arial, Helvetica, sans-serif;
   text-align: center;
   line-height: 10px;
   align-self: center;
-  fill: #666666;
+  fill: #444444;
   font-style: normal;
   padding: 1px;
 }
@@ -356,7 +356,7 @@
   font-family: serif, Arial, Helvetica, sans-serif;
   /*color: #db3915; include later if required*/
   visibility: visible;
-  max-height: 20px;
+  max-height: 30px;
 }
 
 .x-axis,
@@ -377,7 +377,7 @@
 
 .death-line,
 .vaccination-line {
-  stroke-width: 1.5px;
+  stroke-width: 2px;
   stroke-opacity: 0.9;
   /* fill-opacity: 0.05; */
 }

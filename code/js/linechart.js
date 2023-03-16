@@ -428,7 +428,7 @@ export function updateLineChart() {
                         <tspan x="14" dy="1em">Vaccination Rate: ${vaccinationYValue}%</tspan>
                       `;
                     })
-                    .style("fill", "#777777")
+                    .style("fill", "#444444")
                     .transition()
                     .delay(1000)
                     .duration(500)

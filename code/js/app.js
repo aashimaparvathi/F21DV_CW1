@@ -1,3 +1,17 @@
+/* The driving file for all the visualizations.
+Tasks:
+  Set up the introduction page
+  Extract data from CSV file and filter and fix as required
+  Render the time series world map.
+    Projection: geoMercator
+    Data: Shows number of new cases per country per month
+  Call other functions to render all other visualizations
+Functions:
+  intervalFunction() - to handle time series data on the map with the play button
+  updateColors() - to update colors on map based on number of new cases
+*/
+
+/* Imports */
 import { drawHeatmap } from "./heatmap.js";
 import { drawLineChart } from "./linechart.js";
 import { renderLineChart } from "./linechart.js";
@@ -5,7 +19,7 @@ import { updateLineChart } from "./linechart.js";
 import { renderBubbleChart } from "./bubblechart.js";
 import { scatterPlot } from "./kmeans.js";
 
-// Define the dimensions and margins of the plot
+// Define the dimensions and margins of the plot and other variables
 var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   svgWidth = 900 - margin.left - margin.right,
   svgHeight = 473 - margin.top - margin.bottom,
@@ -18,8 +32,7 @@ var margin = { top: 80, right: 30, bottom: 30, left: 5 },
   wave2year = 2021,
   wave2month = 3,
   wave3year = 2021,
-  wave3month = 5,
-  dataForAMonth_g = {}; // global variable;
+  wave3month = 5;
 
 export { wave1month };
 export { wave1year };
@@ -27,6 +40,8 @@ export { wave2month };
 export { wave2year };
 export { wave3month };
 export { wave3year };
+
+/* For the introduction page */
 
 // Select all the <p> elements within the .bullet-points div
 const bulletPoints = d3.select(".bullet-points").selectAll("p");
@@ -51,6 +66,7 @@ export { gdpData };
 var bubbleSvg;
 export { bubbleSvg };
 
+/* For use in bubble chart. Default set of countries */
 var myIsoCodes = [
   "USA",
   "CHN",
@@ -70,17 +86,11 @@ const tooltip = d3
   .style("opacity", 0)
   .style("position", "absolute");
 
-// create a div to hold the location or flag image
-let locationImage = d3
-  .select(".map-container")
-  .append("div")
-  .attr("class", "location-image")
-  .style("position", "absolute")
-  .style("pointer-events", "none")
-  .style("opacity", 0);
+var dataForAMonth_g = {}; // global variable;
 
 const group = d3.select(".map-container");
 
+// Main svg for the map
 var svg = group
   .append("svg")
   .attr("class", "svg-c")
@@ -89,6 +99,8 @@ var svg = group
   .attr("max-width", "100%")
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+/* Play button for the time series map */
 
 group
   .append("div")
@@ -106,31 +118,13 @@ bubbleSvg = d3
   .attr("height", bubbleHeight + bubbleMargin.top + bubbleMargin.bottom)
   .attr("max-width", "100%");
 
-var lineGroup = d3
-  .select(".line-chart-container")
-  // .append("div")
-  // .attr("class", "linegroup-c")
-  .attr("id", "linegroup");
-
-var gdpGroup = d3
-  .select(".heatmap-container")
-  .append("g")
-  .attr("class", "gdpgroup-c")
-  .attr("id", "gdpgroup");
-
-var clusterGroup = d3
-  .select(".scatter-container")
-  .append("g")
-  .attr("class", "clustergroup-c")
-  .attr("id", "clustergroup");
-
 drawLineChart("line-chart-container");
 
 // Create projection to map the latitudes and longitudes to x and y
 const projection = d3
   .geoMercator()
   .rotate([-10, 0]) // Adjust the rotation of the projection
-  .translate([svgWidth / 2, svgHeight / 2]) // To centre it. Later we'll scale it.
+  .translate([svgWidth / 2, svgHeight / 2]) // To centre it.
   .scale(120);
 
 // Create path using the projection. Pass it to the d attribute of path
@@ -188,7 +182,6 @@ Promise.all([
   d3.csv("./data/monthly_all.csv"),
 ]).then(function ([world, monthly]) {
   scatterPlot(monthly, "clustergroup");
-  //kMeans2(5, 100, monthly, "clustergroup");
 
   // Create a map of country names to data for that country
   var dataMap = d3.group(monthly, function (d) {
@@ -227,7 +220,9 @@ Promise.all([
   console.log("gdpData for heatmap.js:");
   console.log(gdpData);
 
+  /* Drawing heat map */
   drawHeatmap("gdpgroup");
+  d3.select("#heatmap-option3").style("font-weight", "bold");
 
   var yearToFilter = 2020;
   var monthToFilter = 2;
@@ -391,15 +386,6 @@ Promise.all([
   yearToFilter = 2020;
   monthToFilter = 2;
 
-  var locationimage = countries
-    .append("image")
-    .attr("class", "location-image")
-    .attr("id", (d) => d.iso_code + "img")
-    .attr("xlink:href", "./images/icon.png")
-    .attr("width", 20)
-    .attr("height", 20)
-    .attr("opacity", 0);
-
   renderLineChart(dataMap, svgHeight);
   updateLineChart();
 
@@ -409,7 +395,6 @@ Promise.all([
   countries
     .on("mouseover", function (event, d) {
       //console.log(d);
-      var countryCode = d3.select(this).attr("class");
       d3.select(this).style("opacity", 0.7);
 
       var cases =
@@ -444,6 +429,8 @@ Promise.all([
     });
 
   // ---------------------------------------------------------------------------------------------------
+  /* Managing the time series on the map */
+
   button.on("click", function () {
     index = 0;
     if (intervalId) {
@@ -548,7 +535,7 @@ Promise.all([
   }
 
   // ---------------------------------------------------------------------------------------------------
-  // ---------------------------------------------------------------------------------------------------
+  /* Brushing section to implement brushing over the map */
 
   const brush = d3
     .brush()

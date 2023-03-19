@@ -133,7 +133,8 @@
 }
 
 .first-summary-container h3 {
-  text-align: center;
+  padding-left: 30%;
+  text-align: left;
   color: black;
 }
 

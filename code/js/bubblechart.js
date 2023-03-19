@@ -1,3 +1,23 @@
+/* The driving file for the bubble chart.
+Tasks:
+  Set up the bubble chart with the initial default set of countries:
+    1.	United States of America: Country with the highest number of total cases based on the dataset.
+    2.	China: Asian representative, second highest in terms of total cases and because of its rumoured role in the origin of the pandemic.
+    3.	Australia: Isolated continent that was known to have handled the pandemic well.
+    4.	Guyana: South American representative.
+    5.	Central African Republic: African representative with least number of cases in Central Africa.
+    6.	Vanuatu: Geographically isolated island country with very low number of total cases.
+    7.	Greenland: North American representative which has the least number of cases in the continent and a geographically isolated country.
+    8.	Philippines: Isolated archipelagic country with high population density.
+    9.	France: European representative with highest total cases in the continent.
+
+  Create the chart and axes. No legend is used since things are fairly obvious.
+  Call the line chart update function to update the line plot based on the country bubble clicked.
+
+Data: Number of new cases against Stringency Index and Population density(radius of bubble).
+*/
+
+/* Imports */
 import { filterData } from "./app.js";
 import { bubbleSvg } from "./app.js";
 import { updateLineChart } from "./linechart.js";
@@ -72,15 +92,16 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
   // Create a tick formatter function that formats the ticks uniformly
   bubbleTickFormatter = bubbleY.tickFormat(10, "~s");
 
+  // Set up bubble radius scale
   bubbleR = d3
     .scaleLinear()
     .domain([0, d3.max(myDataForAMonth_b, (d) => d.population_density)])
     .range([20, 60]);
 
-  /* For reference: var myIsoCodes = ["USA", "CHN", "AUS", "GUY", "CAF", "VUT", "GRL", "PHL"]; */
+  // bubble color scale
   bubbleColor = d3.scaleOrdinal().domain(myIsoCodes).range(d3.schemeCategory10);
-  //      .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#42ecff", "#9467bd"]);
 
+  // Supporting text used in the tooltip
   var bubbleText = [
     { code: "USA", text: "Highest Total Cases" },
     { code: "CHN", text: "The Rumoured Protagonist" },
@@ -111,6 +132,7 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
     )
     .attr("id", "bubblechart");
 
+  // Getting the month and year on the map for use in bubble chart
   var periodText = d3.select(".period-text");
   var period = periodText.text();
 
@@ -127,6 +149,7 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
     .attr("id", "covid-response")
     .text("Impact of Stringency & Population (" + period + ")");
 
+  // Set up the bubbles
   bubbleChart
     .selectAll("circle")
     .data(myDataForAMonth_b)
@@ -144,6 +167,7 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
     .attr("fill-opacity", "0.1")
     .attr("stroke-opacity", "1");
 
+  // Set up the axes and axes labels
   const xAxis = d3.axisBottom(bubbleX);
   const yAxis = d3.axisLeft(bubbleY).tickFormat(bubbleTickFormatter);
 
@@ -174,6 +198,7 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
     .attr("id", "total-cases")
     .text("New Cases");
 
+  // Mouseover (hover) Event handler
   d3.selectAll(".countrybubbles")
     .on("mouseover", function (event, d) {
       (bubbleID = d3.select(this).attr("id")), (bubbleIsoCode = d.iso_code);
@@ -185,6 +210,7 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
       // check if matching object is found and get the corresponding text
       const matchingText = matchingObj ? matchingObj.text : "";
 
+      // set up tooltip content
       d3.select(this).style("opacity", 0.7);
       bubbletooltip
         .html(
@@ -227,6 +253,7 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
         .attr("stroke", bubbleColor(bubbleIsoCode))
         .attr("fill", bubbleColor(bubbleIsoCode));
     })
+    // Mouse out event handler
     .on("mouseout", function (event, d) {
       d3.select(this).style("opacity", 1);
       bubbletooltip
@@ -240,9 +267,8 @@ export function renderBubbleChart(year, month, monthly, myIsoCodes) {
         .classed("country-highlight", false)
         .attr("stroke", "none")
         .attr("fill", countryColor);
-
-      // locationImage.style("opacity", 0);
     })
+    // On click event handler
     .on("click", function () {
       // get the dropdown element
       const dropdown = d3.select("#dropdownmenu");

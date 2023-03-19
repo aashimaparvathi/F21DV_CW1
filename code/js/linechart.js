@@ -1,3 +1,13 @@
+/* The driving file for all the visualizations.
+Tasks:
+  Set up the line plot
+  Update line plot based on country selection from drop down
+Functions:
+  drawLineChart() - set up to draw the line chart
+  renderLineChart() draw the line chart
+  updateLineChart() - to update the line plot based on user selection
+*/
+
 const lineMargin = { top: 20, bottom: 40, left: 0, right: 45 },
   lineWidth = 1000 - lineMargin.left - lineMargin.right,
   lineHeight = 290 - lineMargin.top - lineMargin.bottom,
@@ -179,7 +189,7 @@ export function renderLineChart(dataMap, svgHeight) {
   dropdown.on("change", updateLineChart);
 }
 
-// Define a function to update the chart
+// Update line chart based on selection of country from drop down
 export function updateLineChart() {
   console.log("In updateLineChart function:");
   var country = dropdown.property("value");
@@ -187,6 +197,7 @@ export function updateLineChart() {
   // console.log(country);
   // console.log(countryData);
 
+  /* fix the data */
   countryData.forEach(function (d) {
     d.year = +d.year;
     d.month = +d.month;
@@ -290,7 +301,6 @@ export function updateLineChart() {
     })
     .y(function (d) {
       // console.log("death rate");
-      // console.log(+d.death_rate1 + ", " + lineyScale(+d.death_rate1));
       return lineyScale(+d.death_rate1);
     })
     .curve(curvetype);
@@ -328,6 +338,7 @@ export function updateLineChart() {
       lineMargin.left + "," + lineMargin.top + ")"
     );
 
+  /* mouseover and mouseout event handlers */
   lineSvg
     .on("mousemove", function (event, d) {
       // Get the mouse position
@@ -345,26 +356,12 @@ export function updateLineChart() {
       const deathData = countryData[deathIndex];
       const vaccData = countryData[vaccIndex];
 
-      // console.log(deathData);
-      // console.log(vaccData);
-      // console.log(
-      //   vaccData.date +
-      //     ": death rate: " +
-      //     vaccData.death_rate1 +
-      //     ", vacc rate: " +
-      //     vaccData.vacc_rate +
-      //     ", new deaths PM: " +
-      //     vaccData.new_deaths_per_million +
-      //     ", new cases PM: " +
-      //     vaccData.new_cases_per_million
-      // );
-
       var deathYValue = format(vaccData.death_rate1);
       var vaccinationYValue = format(vaccData.vacc_rate);
       var deathPMYValue = format(vaccData.new_deaths_per_million);
       var casesPMYValue = format(vaccData.new_cases_per_million);
 
-      // Add the vertical line
+      // Add the dashed vertical line
       lineSvg
         .selectAll(".vertical-line")
         .data([xValue])
@@ -384,7 +381,7 @@ export function updateLineChart() {
           (exit) => exit.remove()
         );
 
-      //Add the tooltip
+      //Add the tooltip rectangle and text
       lineSvg
         .selectAll(".line-tooltip")
         .data([xValue])

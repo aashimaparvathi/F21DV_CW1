@@ -1,3 +1,20 @@
+/* The driving file for all the visualizations.
+Tasks:
+  Set up the heat map comparing:
+    total deaths per million or
+    new cases per million or
+    both
+    against GDP per capita
+Functions:
+  createLegend_newCases()
+  createLegend_totalDeaths()
+  renderHeatMap()
+  fixData() - data fix ups
+  toggleTooltip() - to set tooltip and turn it on and off
+*/
+
+/* Imports */
+
 import { gdpData } from "./app.js";
 
 const gdpMargin = { top: 10, bottom: 45, left: 40, right: 30 },
@@ -35,12 +52,7 @@ export function drawHeatmap(containerId) {
     .style("opacity", 0)
     .style("position", "absolute");
 
-  image_tooltip = d3
-    .select("#" + containerId)
-    .append("img")
-    .attr("class", "heatmap-image-tooltip")
-    .attr("src", "./images/icon.png")
-    .style("display", "none");
+  /* fix the data */
 
   var gdpData_fixed = fixData(gdpData);
   // console.log("gdpData fixed");
@@ -92,7 +104,7 @@ export function drawHeatmap(containerId) {
   // console.log("gdpData_fixed1");
   // console.log(gdpData_fixed1);
 
-  // Scales
+  // axes and scales, color scale
   x = d3
     .scaleLinear()
     .domain([/*gdpMin / 1000*/ 0, (gdpMax + 20000) / 1000])
@@ -122,6 +134,10 @@ export function drawHeatmap(containerId) {
     .attr("height", gdpHeight)
     .append("g")
     .attr("transform", `translate(${gdpMargin.left},${gdpMargin.top})`);
+
+  /*  dropdown here indicates the selection box
+        to choose parameters
+    */
 
   const dropdown = svglegend
     .append("svg")
@@ -187,6 +203,7 @@ export function drawHeatmap(containerId) {
     .attr("text-anchor", "middle")
     .text("Total deaths / New cases (Per million)");
 
+  /* Set up the heatmap rectangles */
   deathsRect = svg
     .selectAll(".deaths-rect")
     .data(gdpData_fixed1)
@@ -228,17 +245,22 @@ export function drawHeatmap(containerId) {
     });
 }
 
+/* Function to render the heat map */
 function renderHeatMap(what, containerId, gdpData_fixed1) {
   //console.log(what);
 
   const svg = d3.select("#" + containerId);
   d3.select("#" + what).style("font-weight", "bold");
 
+  /* Controlling the updates to the objects on the screen
+  based on user selection in the if..else statements
+  */
   d3.select(".y-axis-label").text(function (d) {
+    /* Total deaths per million */
+
     if (what == "heatmap-option1") {
       d3.select("#heatmap-option2").style("font-weight", "normal");
       d3.select("#heatmap-option3").style("font-weight", "normal");
-      /* Total deaths per million */
 
       d3.selectAll(".cases-rect").remove();
       d3.select(".heatmap-cases-legend")
@@ -260,9 +282,7 @@ function renderHeatMap(what, containerId, gdpData_fixed1) {
         .duration(500)
         .style("opacity", 1);
 
-      // y1 = d3.scaleLinear().domain([0, deathMax]).range([gdpHeight, 0]);
-      // y2 = d3.scaleLinear().domain([0, casesMax]).range([gdpHeight, 0]);
-
+      /* General y scale for both total deaths and new cases */
       y_gen.domain([deathMin - 10, deathMax]);
 
       svg
@@ -290,21 +310,11 @@ function renderHeatMap(what, containerId, gdpData_fixed1) {
         .on("mouseout", function (event, d) {
           toggleTooltip(event, d, off);
         });
-
-      // rect
-      //   .append("image")
-      //   .attr("class", "tooltip-image")
-      //   .attr("xlink:href", "./images/icon.png")
-      //   .attr("width", 100)
-      //   .attr("height", 100)
-      //   .attr("x", 10)
-      //   .attr("y", 10);
-
       return "Total deaths per million";
     } else if (what == "heatmap-option2") {
+      /* New cases per million */
       d3.select("#heatmap-option1").style("font-weight", "normal");
       d3.select("#heatmap-option3").style("font-weight", "normal");
-      /* New cases per million */
 
       d3.selectAll(".deaths-rect").remove();
       d3.select(".heatmap-deaths-legend")

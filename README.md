@@ -1,5 +1,7 @@
 # COVID-19 – A Proportionate or Disproportionate Impact on the World
 
+### **Please ensure to cite this repository if you use any of its code**
+
 ## Overview
 
 During the COVID-19 pandemic core period between February 2020 and February 2023, countries across the world were hit very differently due to varying social, economic, and environmental factors. This project approaches the data from this perspective.

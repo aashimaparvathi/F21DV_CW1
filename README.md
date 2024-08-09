@@ -1,6 +1,6 @@
 # COVID-19 – A Proportionate or Disproportionate Impact on the World
 
-### **Please ensure to cite this repository if you use any of its code**
+### **Please ensure that you cite this repository if you use any of its code.**
 
 ## Overview
 
